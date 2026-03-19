@@ -1162,29 +1162,55 @@
             const statusText = { pending:'待执行', running:'运行中', paused:'已暂停', completed:'已完成', cancelled:'已取消' };
             document.getElementById('tasks-tbody').innerHTML = tasks.length ? tasks.map(t => {
                 const taskSources = (t.source_ids||[]).map(sid=>sources.find(s=>s.id===sid)?.name||sid.slice(0,8)).join(', ');
-                return `<tr><td><strong>${t.name}</strong></td><td style="color:var(--text-secondary);font-size:13px;">${taskSources||'-'}</td><td>${t.timeout}秒</td><td><span class="badge ${statusMap[t.status]||''}">${statusText[t.status]||t.status}</span></td><td>${t.status==='running'?'<button class="btn btn-warning btn-sm" onclick="pauseTask(\''+t.id+'\')">暂停</button>':''}${t.status==='paused'?'<button class="btn btn-success btn-sm" onclick="resumeTask(\''+t.id+'\')">恢复</button>':''}${!['completed','cancelled'].includes(t.status)?'<button class="btn btn-danger btn-sm" onclick="cancelTask(\''+t.id+'\')">取消</button>':''} <button class="btn btn-danger btn-sm" onclick="deleteTask('${t.id}')">删除</button></td></tr>`;
+                return `<tr><td><strong>${t.name}</strong></td><td style="color:var(--text-secondary);font-size:13px;">${taskSources||'-'}</td><td>${t.timeout}秒</td><td><span class="badge ${statusMap[t.status]||''}">${statusText[t.status]||t.status}</span></td><td>
+                    ${t.status==='pending'?'<button class="btn btn-success btn-sm" onclick="runTask(\''+t.id+'\')">执行</button>':''}
+                    ${t.status==='running'?'<button class="btn btn-warning btn-sm" onclick="pauseTask(\''+t.id+'\')">暂停</button>':''}
+                    ${t.status==='paused'?'<button class="btn btn-success btn-sm" onclick="resumeTask(\''+t.id+'\')">恢复</button>':''}
+                    <button class="btn btn-secondary btn-sm" onclick="showTaskModal(\''+t.id+'\')">编辑</button>
+                    ${!['completed','cancelled'].includes(t.status)?'<button class="btn btn-danger btn-sm" onclick="cancelTask(\''+t.id+'\')">取消</button>':''}
+                    <button class="btn btn-danger btn-sm" onclick="deleteTask('${t.id}')">删除</button>
+                </td></tr>`;
             }).join('') : '<tr><td colspan="5" style="text-align:center;padding:40px;">暂无任务</td></tr>';
         }
         
-        async function showTaskModal() {
+        async function showTaskModal(id) {
             document.getElementById('task-form').reset();
             document.getElementById('task-id').value = '';
             const sources = await api('GET', '/sources?limit=1000');
             document.getElementById('task-sources').innerHTML = sources.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            if (id) {
+                const t = await api('GET', '/tasks/'+id);
+                document.getElementById('task-id').value = t.id;
+                document.getElementById('task-name').value = t.name;
+                document.getElementById('task-timeout').value = t.timeout;
+                document.getElementById('task-retry').value = t.retry_count;
+                const selected = t.source_ids || [];
+                Array.from(document.getElementById('task-sources').options).forEach(opt => {
+                    if (selected.includes(opt.value)) opt.selected = true;
+                });
+            }
             document.getElementById('task-modal').classList.add('active');
         }
         
         document.getElementById('task-form').onsubmit = async e => {
             e.preventDefault();
+            const id = document.getElementById('task-id').value;
             const selected = Array.from(document.getElementById('task-sources').selectedOptions).map(o => o.value);
             const data = { name: document.getElementById('task-name').value, source_ids: selected, timeout: parseInt(document.getElementById('task-timeout').value), retry_count: parseInt(document.getElementById('task-retry').value) };
-            try { await api('POST','/tasks',data); closeModal('task-modal'); loadTasks(); toast('创建成功'); } catch(e) { toast(e.message,'error'); }
+            try { 
+                if (id) await api('PUT', '/tasks/'+id, data);
+                else await api('POST', '/tasks', data);
+                closeModal('task-modal'); 
+                loadTasks(); 
+                toast(id ? '更新成功' : '创建成功'); 
+            } catch(e) { toast(e.message,'error'); }
         };
         
-        async function pauseTask(id) { await api('POST','/tasks/'+id+'/pause'); loadTasks(); toast('已暂停'); }
-        async function resumeTask(id) { await api('POST','/tasks/'+id+'/resume'); loadTasks(); toast('已恢复'); }
-        async function cancelTask(id) { await api('POST','/tasks/'+id+'/cancel'); loadTasks(); toast('已取消'); }
-        async function deleteTask(id) { if(!confirm('确定删除?'))return; await api('DELETE','/tasks/'+id); loadTasks(); toast('已删除'); }
+        async function runTask(id) { try { await api('POST', '/tasks/'+id+'/run'); loadTasks(); toast('任务已开始执行'); } catch(e) { toast(e.message,'error'); } }
+        async function pauseTask(id) { try { await api('POST', '/tasks/'+id+'/pause'); loadTasks(); toast('已暂停'); } catch(e) { toast(e.message,'error'); } }
+        async function resumeTask(id) { try { await api('POST', '/tasks/'+id+'/resume'); loadTasks(); toast('已恢复'); } catch(e) { toast(e.message,'error'); } }
+        async function cancelTask(id) { try { await api('POST', '/tasks/'+id+'/cancel'); loadTasks(); toast('已取消'); } catch(e) { toast(e.message,'error'); } }
+        async function deleteTask(id) { if(!confirm('确定删除?'))return; try { await api('DELETE', '/tasks/'+id); loadTasks(); toast('已删除'); } catch(e) { toast(e.message,'error'); } }
         
         // Intelligence
         async function loadIntelligence(page = 1) {

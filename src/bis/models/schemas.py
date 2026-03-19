@@ -159,3 +159,86 @@ class IntelligenceSearchQuery(BaseModel):
     end_date: Optional[datetime] = None
     page: int = Field(default=1, ge=1)
     page_size: int = Field(default=20, ge=1, le=100)
+
+
+class SelectorType(str, Enum):
+    CSS = "css"
+    XPATH = "xpath"
+    REGEX = "regex"
+
+
+class KeywordMatchType(str, Enum):
+    CONTAINS = "contains"
+    EXACT = "exact"
+    STARTS_WITH = "starts_with"
+    ENDS_WITH = "ends_with"
+    REGEX = "regex"
+
+
+class CollectionRuleBase(BaseModel):
+    source_id: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=200)
+    
+    list_selector: Optional[str] = None
+    list_selector_type: SelectorType = SelectorType.CSS
+    
+    title_selector: Optional[str] = None
+    title_selector_type: SelectorType = SelectorType.CSS
+    
+    content_selector: Optional[str] = None
+    content_selector_type: SelectorType = SelectorType.CSS
+    
+    link_selector: Optional[str] = None
+    link_selector_type: SelectorType = SelectorType.CSS
+    
+    date_selector: Optional[str] = None
+    date_selector_type: SelectorType = SelectorType.CSS
+    date_format: Optional[str] = None
+    
+    keyword_match: Optional[str] = None
+    keyword_match_type: KeywordMatchType = KeywordMatchType.CONTAINS
+    
+    regex_pattern: Optional[str] = None
+    
+    follow_next_page: bool = False
+    next_page_selector: Optional[str] = None
+    max_pages: int = Field(default=1, ge=1)
+    
+    priority: int = Field(default=0)
+
+
+class CollectionRuleCreate(CollectionRuleBase):
+    pass
+
+
+class CollectionRuleUpdate(BaseModel):
+    name: Optional[str] = None
+    list_selector: Optional[str] = None
+    list_selector_type: Optional[SelectorType] = None
+    title_selector: Optional[str] = None
+    title_selector_type: Optional[SelectorType] = None
+    content_selector: Optional[str] = None
+    content_selector_type: Optional[SelectorType] = None
+    link_selector: Optional[str] = None
+    link_selector_type: Optional[SelectorType] = None
+    date_selector: Optional[str] = None
+    date_selector_type: Optional[SelectorType] = None
+    date_format: Optional[str] = None
+    keyword_match: Optional[str] = None
+    keyword_match_type: Optional[KeywordMatchType] = None
+    regex_pattern: Optional[str] = None
+    follow_next_page: Optional[bool] = None
+    next_page_selector: Optional[str] = None
+    max_pages: Optional[int] = Field(None, ge=1)
+    enabled: Optional[bool] = None
+    priority: Optional[int] = None
+
+
+class CollectionRule(CollectionRuleBase):
+    id: str
+    enabled: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True

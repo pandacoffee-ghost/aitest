@@ -87,3 +87,12 @@ class TaskService:
             return None
         model.status = TaskStatus.COMPLETED.value
         return self.repo.update(model)
+
+    def run_now(self, id: str) -> Optional[CollectionTaskModel]:
+        model = self.repo.get_by_id(id)
+        if not model:
+            return None
+        if model.status == TaskStatus.RUNNING.value:
+            raise ValueError(f"Task {id} is already running")
+        model.status = TaskStatus.RUNNING.value
+        return self.repo.update(model)

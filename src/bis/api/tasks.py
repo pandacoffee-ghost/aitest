@@ -80,3 +80,15 @@ def cancel_task(task_id: str, db: Session = Depends(get_db)):
         return task
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/{task_id}/run", response_model=CollectionTask)
+def run_task(task_id: str, db: Session = Depends(get_db)):
+    service = TaskService(db)
+    try:
+        task = service.run_now(task_id)
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+        return task
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

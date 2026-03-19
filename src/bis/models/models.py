@@ -45,6 +45,7 @@ class IntelligenceSourceModel(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     intelligence_items = relationship("IntelligenceDetailModel", back_populates="source")
+    rules = relationship("CollectionRuleModel", back_populates="source", cascade="all, delete-orphan")
 
 
 class ProxyModel(Base):
@@ -106,3 +107,43 @@ class IntelligenceDetailModel(Base):
     deduplication_key = Column(String(200), nullable=True, index=True)
 
     source = relationship("IntelligenceSourceModel", back_populates="intelligence_items")
+
+
+class CollectionRuleModel(Base):
+    __tablename__ = "collection_rules"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    source_id = Column(String(36), ForeignKey("intelligence_sources.id"), nullable=True)
+    name = Column(String(200), nullable=False)
+    
+    list_selector = Column(String(500), nullable=True)
+    list_selector_type = Column(String(20), default="css")
+    
+    title_selector = Column(String(500), nullable=True)
+    title_selector_type = Column(String(20), default="css")
+    
+    content_selector = Column(String(500), nullable=True)
+    content_selector_type = Column(String(20), default="css")
+    
+    link_selector = Column(String(500), nullable=True)
+    link_selector_type = Column(String(20), default="css")
+    
+    date_selector = Column(String(500), nullable=True)
+    date_selector_type = Column(String(20), default="css")
+    date_format = Column(String(100), nullable=True)
+    
+    keyword_match = Column(Text, nullable=True)
+    keyword_match_type = Column(String(20), default="contains")
+    
+    regex_pattern = Column(Text, nullable=True)
+    
+    follow_next_page = Column(Boolean, default=False)
+    next_page_selector = Column(String(500), nullable=True)
+    max_pages = Column(Integer, default=1)
+    
+    enabled = Column(Boolean, default=True)
+    priority = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    source = relationship("IntelligenceSourceModel", back_populates="rules")

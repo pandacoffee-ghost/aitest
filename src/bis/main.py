@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 from bis.core.config import get_settings
 from bis.core.logging import setup_logging
 from bis.core.database import init_db
-from bis.api import sources, proxies, user_agents, tasks, intelligence
+from bis.api import sources, proxies, user_agents, tasks, intelligence, rules
 
 settings = get_settings()
 
@@ -38,6 +38,7 @@ app.include_router(proxies.router)
 app.include_router(user_agents.router)
 app.include_router(tasks.router)
 app.include_router(intelligence.router)
+app.include_router(rules.router)
 
 
 with open("src/bis/templates/index.html", "r", encoding="utf-8") as f:
