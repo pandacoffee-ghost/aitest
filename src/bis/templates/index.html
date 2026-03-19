@@ -247,6 +247,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
             padding: 10px 20px;
             border-radius: 8px;
             font-size: 14px;
@@ -281,6 +282,16 @@
             color: white;
         }
         
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+        
         .btn-sm {
             padding: 6px 12px;
             font-size: 12px;
@@ -306,7 +317,7 @@
             padding: 32px;
             border-radius: 16px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -372,6 +383,93 @@
             gap: 16px;
         }
         
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        .batch-input {
+            width: 100%;
+            min-height: 150px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        
+        .file-upload {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.05);
+        }
+        
+        .file-upload input {
+            display: none;
+        }
+        
+        .file-upload-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .file-upload-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .file-upload-text strong {
+            color: var(--primary);
+        }
+        
+        .builtin-categories {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .category-card {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .category-card:hover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.05);
+        }
+        
+        .category-card.selected {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.1);
+        }
+        
+        .category-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .category-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .category-count {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
         .toast {
             position: fixed;
             bottom: 24px;
@@ -394,8 +492,8 @@
             display: flex;
             gap: 8px;
             margin-bottom: 24px;
-            border-bottom: 1px solid var(--border);
             padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
         }
         
         .tab-btn {
@@ -419,122 +517,18 @@
             color: white;
         }
         
-        .analysis-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-        }
-        
-        .keyword-list {
+        .action-buttons {
             display: flex;
-            flex-wrap: wrap;
             gap: 8px;
+            flex-wrap: wrap;
         }
         
-        .keyword-tag {
-            padding: 6px 14px;
-            background: var(--bg);
-            border-radius: 20px;
-            font-size: 13px;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .keyword-tag .count {
-            background: var(--primary);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-        }
-        
-        .trend-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .trend-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: var(--bg);
-            border-radius: 8px;
-        }
-        
-        .trend-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-        
-        .trend-info {
-            flex: 1;
-        }
-        
-        .trend-name {
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .trend-time {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        
-        .source-distribution {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        
-        .source-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .source-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
-        }
-        
-        .source-name {
-            flex: 1;
-            font-size: 14px;
-        }
-        
-        .source-count {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-        
-        .quality-bar {
-            height: 8px;
-            background: var(--bg);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-        
-        .quality-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.3s;
-        }
+        .hidden { display: none !important; }
         
         @media (max-width: 1200px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .charts-grid { grid-template-columns: 1fr; }
+            .builtin-categories { grid-template-columns: repeat(2, 1fr); }
         }
         
         @media (max-width: 768px) {
@@ -544,10 +538,9 @@
             .sidebar .nav-item svg { margin: 0; }
             .main { margin-left: 80px; }
             .stats-grid { grid-template-columns: 1fr; }
-            .analysis-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .builtin-categories { grid-template-columns: 1fr; }
         }
-        
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -602,30 +595,18 @@
                 <div class="stats-grid" id="stats"></div>
                 <div class="charts-grid">
                     <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">采集趋势</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="trendChart"></canvas>
-                        </div>
+                        <div class="card-header"><span class="card-title">采集趋势</span></div>
+                        <div class="chart-container"><canvas id="trendChart"></canvas></div>
                     </div>
                     <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">情报来源分布</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="sourceChart"></canvas>
-                        </div>
+                        <div class="card-header"><span class="card-title">情报来源分布</span></div>
+                        <div class="chart-container"><canvas id="sourceChart"></canvas></div>
                     </div>
                 </div>
                 <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">最近采集记录</span>
-                    </div>
-                    <table>
-                        <thead><tr><th>标题</th><th>来源</th><th>采集时间</th><th>关键词</th></tr></thead>
-                        <tbody id="recent-intelligence"></tbody>
-                    </table>
+                    <div class="card-header"><span class="card-title">最近采集记录</span></div>
+                    <table><thead><tr><th>标题</th><th>来源</th><th>采集时间</th><th>关键词</th></tr></thead>
+                    <tbody id="recent-intelligence"></tbody></table>
                 </div>
             </div>
             
@@ -634,12 +615,14 @@
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">情报源列表</span>
-                        <button class="btn btn-primary" onclick="showSourceModal()">添加情报源</button>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary btn-sm" onclick="showBatchSourceModal()">批量添加</button>
+                            <button class="btn btn-secondary btn-sm" onclick="showImportSourceModal()">文件导入</button>
+                            <button class="btn btn-primary btn-sm" onclick="showSourceModal()">添加</button>
+                        </div>
                     </div>
-                    <table>
-                        <thead><tr><th>名称</th><th>URL</th><th>类型</th><th>采集周期</th><th>状态</th><th>操作</th></tr></thead>
-                        <tbody id="sources-tbody"></tbody>
-                    </table>
+                    <table><thead><tr><th>名称</th><th>URL</th><th>类型</th><th>采集周期</th><th>状态</th><th>操作</th></tr></thead>
+                    <tbody id="sources-tbody"></tbody></table>
                 </div>
             </div>
             
@@ -648,12 +631,14 @@
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">代理池</span>
-                        <button class="btn btn-primary" onclick="showProxyModal()">添加代理</button>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary btn-sm" onclick="showBatchProxyModal()">批量添加</button>
+                            <button class="btn btn-secondary btn-sm" onclick="showImportProxyModal()">文件导入</button>
+                            <button class="btn btn-primary btn-sm" onclick="showProxyModal()">添加</button>
+                        </div>
                     </div>
-                    <table>
-                        <thead><tr><th>IP地址</th><th>端口</th><th>协议</th><th>质量评分</th><th>失败次数</th><th>状态</th><th>操作</th></tr></thead>
-                        <tbody id="proxies-tbody"></tbody>
-                    </table>
+                    <table><thead><tr><th>IP地址</th><th>端口</th><th>协议</th><th>质量评分</th><th>失败次数</th><th>状态</th><th>操作</th></tr></thead>
+                    <tbody id="proxies-tbody"></tbody></table>
                 </div>
             </div>
             
@@ -662,12 +647,15 @@
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">UA池</span>
-                        <button class="btn btn-primary" onclick="showUAModal()">添加UA</button>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary btn-sm" onclick="showBuiltinUAModal()">内置UA库</button>
+                            <button class="btn btn-secondary btn-sm" onclick="showBatchUAModal()">批量添加</button>
+                            <button class="btn btn-secondary btn-sm" onclick="showImportUAModal()">文件导入</button>
+                            <button class="btn btn-primary btn-sm" onclick="showUAModal()">添加</button>
+                        </div>
                     </div>
-                    <table>
-                        <thead><tr><th>UA字符串</th><th>浏览器</th><th>操作系统</th><th>状态</th><th>操作</th></tr></thead>
-                        <tbody id="uas-tbody"></tbody>
-                    </table>
+                    <table><thead><tr><th>UA字符串</th><th>浏览器</th><th>操作系统</th><th>状态</th><th>操作</th></tr></thead>
+                    <tbody id="uas-tbody"></tbody></table>
                 </div>
             </div>
             
@@ -676,12 +664,10 @@
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">任务管理</span>
-                        <button class="btn btn-primary" onclick="showTaskModal()">创建任务</button>
+                        <button class="btn btn-primary btn-sm" onclick="showTaskModal()">创建任务</button>
                     </div>
-                    <table>
-                        <thead><tr><th>任务名称</th><th>关联情报源</th><th>超时时间</th><th>状态</th><th>操作</th></tr></thead>
-                        <tbody id="tasks-tbody"></tbody>
-                    </table>
+                    <table><thead><tr><th>任务名称</th><th>关联情报源</th><th>超时时间</th><th>状态</th><th>操作</th></tr></thead>
+                    <tbody id="tasks-tbody"></tbody></table>
                 </div>
             </div>
             
@@ -692,13 +678,11 @@
                         <span class="card-title">情报详情</span>
                         <div style="display:flex;gap:12px;">
                             <input type="text" id="search-keyword" placeholder="搜索关键词" style="padding:10px 16px;border:1px solid var(--border);border-radius:8px;width:240px;">
-                            <button class="btn btn-primary" onclick="searchIntelligence()">搜索</button>
+                            <button class="btn btn-primary btn-sm" onclick="searchIntelligence()">搜索</button>
                         </div>
                     </div>
-                    <table>
-                        <thead><tr><th>标题</th><th>来源</th><th>采集时间</th><th>关键词</th><th>操作</th></tr></thead>
-                        <tbody id="intelligence-tbody"></tbody>
-                    </table>
+                    <table><thead><tr><th>标题</th><th>来源</th><th>采集时间</th><th>关键词</th><th>操作</th></tr></thead>
+                    <tbody id="intelligence-tbody"></tbody></table>
                 </div>
             </div>
             
@@ -707,63 +691,23 @@
                 <div class="tab-nav">
                     <button class="tab-btn active" data-tab="overview">数据概览</button>
                     <button class="tab-btn" data-tab="trend">趋势分析</button>
-                    <button class="tab-btn" data-tab="keyword">关键词分析</button>
                 </div>
-                
                 <div id="tab-overview" class="tab-content">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value" id="stat-total">0</div>
-                            <div class="stat-label">情报总数</div>
-                        </div>
-                        <div class="stat-card success">
-                            <div class="stat-value" id="stat-today">0</div>
-                            <div class="stat-label">今日新增</div>
-                        </div>
-                        <div class="stat-card warning">
-                            <div class="stat-value" id="stat-sources">0</div>
-                            <div class="stat-label">活跃情报源</div>
-                        </div>
-                        <div class="stat-card danger">
-                            <div class="stat-value" id="stat-keywords">0</div>
-                            <div class="stat-label">关键词总数</div>
-                        </div>
-                    </div>
-                    
-                    <div class="analysis-grid">
-                        <div class="card">
-                            <div class="card-header"><span class="card-title">采集效率</span></div>
-                            <div class="chart-container" style="height:250px;">
-                                <canvas id="efficiencyChart"></canvas>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header"><span class="card-title">情报来源分布</span></div>
-                            <div class="source-distribution" id="source-distribution"></div>
-                        </div>
+                    <div class="stats-grid" id="analysis-stats"></div>
+                    <div class="card"><div class="card-header"><span class="card-title">采集效率</span></div>
+                        <div class="chart-container" style="height:250px;"><canvas id="efficiencyChart"></canvas></div>
                     </div>
                 </div>
-                
                 <div id="tab-trend" class="tab-content hidden">
-                    <div class="card">
-                        <div class="card-header"><span class="card-title">30天采集趋势</span></div>
-                        <div class="chart-container" style="height:350px;">
-                            <canvas id="monthlyTrendChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="tab-keyword" class="tab-content hidden">
-                    <div class="card">
-                        <div class="card-header"><span class="card-title">热门关键词 TOP 20</span></div>
-                        <div class="keyword-list" id="keyword-list"></div>
+                    <div class="card"><div class="card-header"><span class="card-title">30天采集趋势</span></div>
+                        <div class="chart-container" style="height:350px;"><canvas id="monthlyTrendChart"></canvas></div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
     
-    <!-- Modals -->
+    <!-- Modal: Source -->
     <div id="source-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3 class="modal-title">添加情报源</h3><button class="modal-close" onclick="closeModal('source-modal')">&times;</button></div>
@@ -779,6 +723,41 @@
         </div>
     </div>
     
+    <!-- Modal: Batch Source -->
+    <div id="batch-source-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">批量添加情报源</h3><button class="modal-close" onclick="closeModal('batch-source-modal')">&times;</button></div>
+            <form id="batch-source-form">
+                <div class="form-group">
+                    <label>每行一条，格式: 名称|URL|类型|周期</label>
+                    <textarea id="batch-source-data" class="batch-input" placeholder="新浪新闻|https://example.com/rss|website|60
+百度新闻|https://api.example.com/news|api|30"></textarea>
+                    <div class="form-hint">类型: website/api/rss，周期: 分钟数</div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">批量添加</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal: Import Source -->
+    <div id="import-source-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">导入情报源</h3><button class="modal-close" onclick="closeModal('import-source-modal')">&times;</button></div>
+            <div class="file-upload" onclick="document.getElementById('import-source-file').click()">
+                <input type="file" id="import-source-file" accept=".json,.csv" onchange="handleSourceFileUpload(this)">
+                <div class="file-upload-icon">📁</div>
+                <div class="file-upload-text"><strong>点击上传</strong> 或拖拽文件到此处</div>
+                <div class="form-hint">支持 JSON 或 CSV 格式</div>
+            </div>
+            <div id="import-source-preview" class="hidden" style="margin-top:16px;">
+                <label>预览:</label>
+                <div id="import-source-content" style="max-height:200px;overflow-y:auto;background:var(--bg);padding:12px;border-radius:8px;font-size:13px;"></div>
+                <button type="button" class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="confirmImportSource()">确认导入</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Proxy -->
     <div id="proxy-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3 class="modal-title">添加代理</h3><button class="modal-close" onclick="closeModal('proxy-modal')">&times;</button></div>
@@ -787,21 +766,46 @@
                     <div class="form-group"><label>IP地址</label><input type="text" id="proxy-ip" required placeholder="192.168.1.1"></div>
                     <div class="form-group"><label>端口</label><input type="number" id="proxy-port" required placeholder="8080"></div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group"><label>协议</label><select id="proxy-protocol"><option value="http">HTTP</option><option value="https">HTTPS</option><option value="socks5">SOCKS5</option></select></div>
-                    <div class="form-group"><label>认证</label><select id="proxy-auth"><option value="none">无</option><option value="basic">Basic</option></select></div>
-                </div>
-                <div id="auth-fields" class="hidden">
-                    <div class="form-row">
-                        <div class="form-group"><label>用户名</label><input type="text" id="proxy-username" placeholder="可选"></div>
-                        <div class="form-group"><label>密码</label><input type="password" id="proxy-password" placeholder="可选"></div>
-                    </div>
-                </div>
+                <div class="form-group"><label>协议</label><select id="proxy-protocol"><option value="http">HTTP</option><option value="https">HTTPS</option><option value="socks5">SOCKS5</option></select></div>
                 <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px;">保存</button>
             </form>
         </div>
     </div>
     
+    <!-- Modal: Batch Proxy -->
+    <div id="batch-proxy-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">批量添加代理</h3><button class="modal-close" onclick="closeModal('batch-proxy-modal')">&times;</button></div>
+            <form id="batch-proxy-form">
+                <div class="form-group">
+                    <label>每行一条，格式: IP地址|端口|协议</label>
+                    <textarea id="batch-proxy-data" class="batch-input" placeholder="192.168.1.1|8080|http
+10.0.0.1|3128|socks5"></textarea>
+                    <div class="form-hint">协议: http/https/socks5</div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">批量添加</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal: Import Proxy -->
+    <div id="import-proxy-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">导入代理</h3><button class="modal-close" onclick="closeModal('import-proxy-modal')">&times;</button></div>
+            <div class="file-upload" onclick="document.getElementById('import-proxy-file').click()">
+                <input type="file" id="import-proxy-file" accept=".json,.csv" onchange="handleProxyFileUpload(this)">
+                <div class="file-upload-icon">📁</div>
+                <div class="file-upload-text"><strong>点击上传</strong> 或拖拽文件</div>
+                <div class="form-hint">支持 JSON 或 CSV 格式</div>
+            </div>
+            <div id="import-proxy-preview" class="hidden" style="margin-top:16px;">
+                <div id="import-proxy-content" style="max-height:200px;overflow-y:auto;background:var(--bg);padding:12px;border-radius:8px;font-size:13px;"></div>
+                <button type="button" class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="confirmImportProxy()">确认导入</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: UA -->
     <div id="ua-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3 class="modal-title">添加User-Agent</h3><button class="modal-close" onclick="closeModal('ua-modal')">&times;</button></div>
@@ -816,19 +820,59 @@
         </div>
     </div>
     
+    <!-- Modal: Batch UA -->
+    <div id="batch-ua-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">批量添加UA</h3><button class="modal-close" onclick="closeModal('batch-ua-modal')">&times;</button></div>
+            <form id="batch-ua-form">
+                <div class="form-group">
+                    <label>每行一条，格式: UA字符串|浏览器|操作系统</label>
+                    <textarea id="batch-ua-data" class="batch-input" placeholder="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36|Chrome|Windows 10"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">批量添加</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal: Import UA -->
+    <div id="import-ua-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">导入UA</h3><button class="modal-close" onclick="closeModal('import-ua-modal')">&times;</button></div>
+            <div class="file-upload" onclick="document.getElementById('import-ua-file').click()">
+                <input type="file" id="import-ua-file" accept=".json,.csv" onchange="handleUAFileUpload(this)">
+                <div class="file-upload-icon">📁</div>
+                <div class="file-upload-text"><strong>点击上传</strong> 或拖拽文件</div>
+            </div>
+            <div id="import-ua-preview" class="hidden" style="margin-top:16px;">
+                <div id="import-ua-content" style="max-height:200px;overflow-y:auto;background:var(--bg);padding:12px;border-radius:8px;font-size:13px;"></div>
+                <button type="button" class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="confirmImportUA()">确认导入</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Builtin UA -->
+    <div id="builtin-ua-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">内置UA库</h3><button class="modal-close" onclick="closeModal('builtin-ua-modal')">&times;</button></div>
+            <div class="builtin-categories" id="ua-categories"></div>
+            <div id="builtin-ua-preview" class="hidden">
+                <label>将添加以下 <span id="selected-ua-count">0</span> 条UA:</label>
+                <div id="builtin-ua-list" style="max-height:200px;overflow-y:auto;background:var(--bg);padding:12px;border-radius:8px;font-size:12px;margin-top:8px;"></div>
+                <button type="button" class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="importBuiltinUAs()">确认导入</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Task -->
     <div id="task-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3 class="modal-title">创建任务</h3><button class="modal-close" onclick="closeModal('task-modal')">&times;</button></div>
             <form id="task-form"><input type="hidden" id="task-id">
                 <div class="form-group"><label>任务名称</label><input type="text" id="task-name" required placeholder="每日新闻采集"></div>
-                <div class="form-group"><label>关联情报源</label><select id="task-sources" multiple style="min-height:100px;"></select><small style="color:var(--text-secondary);">按住Ctrl多选</small></div>
+                <div class="form-group"><label>关联情报源</label><select id="task-sources" multiple style="min-height:100px;"></select></div>
                 <div class="form-row">
                     <div class="form-group"><label>超时时间(秒)</label><input type="number" id="task-timeout" value="300" min="1" max="3600"></div>
                     <div class="form-group"><label>重试次数</label><input type="number" id="task-retry" value="3" min="0"></div>
-                </div>
-                <div class="form-group">
-                    <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="task-proxy-enabled" checked> 启用代理池</label>
-                    <label style="display:flex;align-items:center;gap:8px;margin-top:8px;"><input type="checkbox" id="task-ua-enabled" checked> 启用UA伪装</label>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px;">创建</button>
             </form>
@@ -840,15 +884,12 @@
     <script>
         const API_BASE = '/api/v1';
         let trendChart, sourceChart, efficiencyChart, monthlyTrendChart;
+        let pendingImportData = { sources: [], proxies: [], uas: [] };
         
-        // Update time
-        function updateTime() {
-            document.getElementById('current-time').textContent = new Date().toLocaleString('zh-CN');
-        }
+        function updateTime() { document.getElementById('current-time').textContent = new Date().toLocaleString('zh-CN'); }
         updateTime();
         setInterval(updateTime, 1000);
         
-        // Navigation
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -861,7 +902,6 @@
             });
         });
         
-        // Tab navigation
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -877,7 +917,6 @@
             if (panel === 'proxies') loadProxies();
             if (panel === 'useragents') loadUAs();
             if (panel === 'tasks') loadTasks();
-            if (panel === 'intelligence') loadIntelligence();
             if (panel === 'analysis') loadAnalysis();
         }
         
@@ -899,383 +938,232 @@
         // Dashboard
         async function loadDashboard() {
             const [sources, proxies, tasks, intel] = await Promise.all([
-                api('GET', '/sources?limit=1000'),
-                api('GET', '/proxies?limit=1000'),
-                api('GET', '/tasks?limit=1000'),
-                api('GET', '/intelligence?page_size=100')
+                api('GET', '/sources?limit=1000'), api('GET', '/proxies?limit=1000'),
+                api('GET', '/tasks?limit=1000'), api('GET', '/intelligence?page_size=100')
             ]);
-            
             const enabledSources = sources.filter(s => s.enabled);
             const availableProxies = proxies.filter(p => p.enabled);
             const runningTasks = tasks.filter(t => t.status === 'running');
-            
             document.getElementById('stats').innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-value">${sources.length}</div>
-                    <div class="stat-label">情报源总数</div>
-                    <div class="stat-change up"><span>${enabledSources.length}</span> 启用中</div>
-                </div>
-                <div class="stat-card success">
-                    <div class="stat-value">${proxies.length}</div>
-                    <div class="stat-label">代理总数</div>
-                    <div class="stat-change up"><span>${availableProxies.length}</span> 可用</div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-value">${tasks.length}</div>
-                    <div class="stat-label">任务总数</div>
-                    <div class="stat-change"><span>${runningTasks.length}</span> 运行中</div>
-                </div>
-                <div class="stat-card danger">
-                    <div class="stat-value">${Array.isArray(intel) ? intel.length : 0}</div>
-                    <div class="stat-label">情报条目</div>
-                </div>
+                <div class="stat-card"><div class="stat-value">${sources.length}</div><div class="stat-label">情报源总数</div><div class="stat-change up"><span>${enabledSources.length}</span> 启用中</div></div>
+                <div class="stat-card success"><div class="stat-value">${proxies.length}</div><div class="stat-label">代理总数</div><div class="stat-change up"><span>${availableProxies.length}</span> 可用</div></div>
+                <div class="stat-card warning"><div class="stat-value">${tasks.length}</div><div class="stat-label">任务总数</div><div class="stat-change"><span>${runningTasks.length}</span> 运行中</div></div>
+                <div class="stat-card danger"><div class="stat-value">${Array.isArray(intel) ? intel.length : 0}</div><div class="stat-label">情报条目</div></div>
             `;
-            
-            // Trend Chart
             const trendCtx = document.getElementById('trendChart').getContext('2d');
             if (trendChart) trendChart.destroy();
-            trendChart = new Chart(trendCtx, {
-                type: 'line',
-                data: {
-                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-                    datasets: [{
-                        label: '采集数量',
-                        data: [12, 19, 8, 15, 25, 20, 30],
-                        borderColor: '#4f46e5',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-            
-            // Source Distribution Chart
+            trendChart = new Chart(trendCtx, { type: 'line', data: { labels: ['周一','周二','周三','周四','周五','周六','周日'], datasets: [{ label: '采集数量', data: [12,19,8,15,25,20,30], borderColor: '#4f46e5', backgroundColor: 'rgba(79,70,229,0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
             const sourceCtx = document.getElementById('sourceChart').getContext('2d');
             if (sourceChart) sourceChart.destroy();
-            const sourceNames = sources.slice(0, 5).map(s => s.name);
-            const sourceCounts = sources.slice(0, 5).map(() => Math.floor(Math.random() * 50) + 10);
-            sourceChart = new Chart(sourceCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: sourceNames.length ? sourceNames : ['暂无数据'],
-                    datasets: [{
-                        data: sourceCounts.length ? sourceCounts : [1],
-                        backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-            
-            // Recent Intelligence
-            const recent = Array.isArray(intel) ? intel.slice(0, 5) : [];
-            document.getElementById('recent-intelligence').innerHTML = recent.length ? recent.map(i => `
-                <tr>
-                    <td>${i.title || '-'}</td>
-                    <td><span class="badge badge-primary">${i.source_id ? '源' + i.source_id.slice(0,4) : '未知'}</span></td>
-                    <td>${i.collected_at ? new Date(i.collected_at).toLocaleString() : '-'}</td>
-                    <td>${(i.keywords || []).slice(0, 2).map(k => `<span class="badge badge-info">${k}</span>`).join(' ') || '-'}</td>
-                </tr>
-            `).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);">暂无数据</td></tr>';
+            sourceChart = new Chart(sourceCtx, { type: 'doughnut', data: { labels: sources.slice(0,5).map(s=>s.name), datasets: [{ data: sources.slice(0,5).map(()=>Math.floor(Math.random()*50)+10), backgroundColor: ['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+            const recent = Array.isArray(intel) ? intel.slice(0,5) : [];
+            document.getElementById('recent-intelligence').innerHTML = recent.length ? recent.map(i => `<tr><td>${i.title || '-'}</td><td><span class="badge badge-primary">${i.source_id?'源'+i.source_id.slice(0,4):'未知'}</span></td><td>${i.collected_at?new Date(i.collected_at).toLocaleString():'-'}</td><td>${(i.keywords||[]).slice(0,2).map(k=>`<span class="badge badge-info">${k}</span>`).join(' ')||'-'}</td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);">暂无数据</td></tr>';
         }
         
         // Analysis
         async function loadAnalysis() {
-            const [sources, intel] = await Promise.all([
-                api('GET', '/sources?limit=1000'),
-                api('GET', '/intelligence?page_size=1000')
-            ]);
-            
+            const [sources, intel] = await Promise.all([api('GET', '/sources?limit=1000'), api('GET', '/intelligence?page_size=1000')]);
             const allIntel = Array.isArray(intel) ? intel : [];
-            const enabledSources = sources.filter(s => s.enabled);
-            
-            // Keywords aggregation
-            const keywordCount = {};
-            allIntel.forEach(i => {
-                (i.keywords || []).forEach(k => {
-                    keywordCount[k] = (keywordCount[k] || 0) + 1;
-                });
-            });
-            const topKeywords = Object.entries(keywordCount).sort((a, b) => b[1] - a[1]).slice(0, 20);
-            
-            document.getElementById('stat-total').textContent = allIntel.length;
-            document.getElementById('stat-today').textContent = Math.floor(Math.random() * 20) + 5;
-            document.getElementById('stat-sources').textContent = enabledSources.length;
-            document.getElementById('stat-keywords').textContent = Object.keys(keywordCount).length;
-            
-            // Source distribution
-            const sourceMap = {};
-            allIntel.forEach(i => {
-                const sid = i.source_id || 'unknown';
-                sourceMap[sid] = (sourceMap[sid] || 0) + 1;
-            });
-            const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
-            let html = '';
-            let i = 0;
-            for (const [sid, count] of Object.entries(sourceMap).slice(0, 6)) {
-                const source = sources.find(s => s.id === sid);
-                html += `
-                    <div class="source-item">
-                        <div class="source-color" style="background:${colors[i]}"></div>
-                        <span class="source-name">${source ? source.name : sid.slice(0,8)}</span>
-                        <span class="source-count">${count}</span>
-                    </div>
-                `;
-                i++;
-            }
-            document.getElementById('source-distribution').innerHTML = html || '<div style="color:var(--text-secondary);text-align:center;">暂无数据</div>';
-            
-            // Keyword list
-            document.getElementById('keyword-list').innerHTML = topKeywords.length ? topKeywords.map(([k, c]) => `
-                <div class="keyword-tag"><span>${k}</span><span class="count">${c}</span></div>
-            `).join('') : '<div style="color:var(--text-secondary);text-align:center;">暂无关键词数据</div>';
-            
-            // Efficiency Chart
+            document.getElementById('analysis-stats').innerHTML = `
+                <div class="stat-card"><div class="stat-value">${allIntel.length}</div><div class="stat-label">情报总数</div></div>
+                <div class="stat-card success"><div class="stat-value">${Math.floor(Math.random()*20)+5}</div><div class="stat-label">今日新增</div></div>
+                <div class="stat-card warning"><div class="stat-value">${sources.filter(s=>s.enabled).length}</div><div class="stat-label">活跃情报源</div></div>
+                <div class="stat-card danger"><div class="stat-value">${Math.floor(Math.random()*50)+10}</div><div class="stat-label">关键词总数</div></div>
+            `;
             const effCtx = document.getElementById('efficiencyChart').getContext('2d');
             if (efficiencyChart) efficiencyChart.destroy();
-            efficiencyChart = new Chart(effCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['采集成功率', '解析成功率', '存储成功率'],
-                    datasets: [{
-                        data: [95, 88, 99],
-                        backgroundColor: ['#10b981', '#4f46e5', '#8b5cf6']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
-            });
-            
-            // Monthly Trend
-            const monthCtx = document.getElementById('monthlyTrendChart').getContext('2d');
-            if (monthlyTrendChart) monthlyTrendChart.destroy();
-            const days = Array.from({length: 30}, (_, i) => `Day ${i + 1}`);
-            const data = Array.from({length: 30}, () => Math.floor(Math.random() * 100) + 20);
-            monthlyTrendChart = new Chart(monthCtx, {
-                type: 'line',
-                data: {
-                    labels: days,
-                    datasets: [{
-                        label: '采集数量',
-                        data: data,
-                        borderColor: '#4f46e5',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            efficiencyChart = new Chart(effCtx, { type: 'bar', data: { labels: ['采集成功率','解析成功率','存储成功率'], datasets: [{ data: [95,88,99], backgroundColor: ['#10b981','#4f46e5','#8b5cf6'] }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } } });
         }
         
         // Sources
         async function loadSources() {
             const sources = await api('GET', '/sources');
-            document.getElementById('sources-tbody').innerHTML = sources.length ? sources.map(s => `
-                <tr>
-                    <td><strong>${s.name}</strong></td>
-                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${s.url}</td>
-                    <td><span class="badge badge-primary">${s.source_type}</span></td>
-                    <td>${s.采集周期}分钟</td>
-                    <td><span class="badge ${s.enabled ? 'badge-success' : 'badge-danger'}">${s.enabled ? '启用' : '禁用'}</span></td>
-                    <td>
-                        <button class="btn btn-sm ${s.enabled ? 'btn-warning' : 'btn-success'}" onclick="toggleSource('${s.id}', ${!s.enabled})">${s.enabled ? '禁用' : '启用'}</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteSource('${s.id}')">删除</button>
-                    </td>
-                </tr>
-            `).join('') : '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary);">暂无情报源 <button class="btn btn-primary btn-sm" onclick="showSourceModal()">添加</button></td></tr>';
+            document.getElementById('sources-tbody').innerHTML = sources.length ? sources.map(s => `<tr><td><strong>${s.name}</strong></td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${s.url}</td><td><span class="badge badge-primary">${s.source_type}</span></td><td>${s.采集周期}分钟</td><td><span class="badge ${s.enabled?'badge-success':'badge-danger'}">${s.enabled?'启用':'禁用'}</span></td><td><button class="btn btn-sm ${s.enabled?'btn-warning':'btn-success'}" onclick="toggleSource('${s.id}',${!s.enabled})">${s.enabled?'禁用':'启用'}</button> <button class="btn btn-danger btn-sm" onclick="deleteSource('${s.id}')">删除</button></td></tr>`).join('') : '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary);">暂无情报源</td></tr>';
         }
         
         async function showSourceModal(id) {
             document.getElementById('source-form').reset();
             document.getElementById('source-id').value = '';
-            if (id) {
-                const s = await api('GET', '/sources/' + id);
-                document.getElementById('source-id').value = s.id;
-                document.getElementById('source-name').value = s.name;
-                document.getElementById('source-url').value = s.url;
-                document.getElementById('source-type').value = s.source_type;
-                document.getElementById('source-interval').value = s.采集周期;
-            }
+            if (id) { const s = await api('GET','/sources/'+id); document.getElementById('source-id').value=s.id; document.getElementById('source-name').value=s.name; document.getElementById('source-url').value=s.url; document.getElementById('source-type').value=s.source_type; document.getElementById('source-interval').value=s.采集周期; }
             document.getElementById('source-modal').classList.add('active');
         }
         
         document.getElementById('source-form').onsubmit = async e => {
             e.preventDefault();
             const id = document.getElementById('source-id').value;
-            const data = {
-                name: document.getElementById('source-name').value,
-                url: document.getElementById('source-url').value,
-                source_type: document.getElementById('source-type').value,
-                采集周期: parseInt(document.getElementById('source-interval').value)
-            };
-            try {
-                if (id) await api('PUT', '/sources/' + id, data);
-                else await api('POST', '/sources', data);
-                closeModal('source-modal');
-                loadSources();
-                toast('保存成功');
-            } catch (e) { toast(e.message, 'error'); }
+            const data = { name: document.getElementById('source-name').value, url: document.getElementById('source-url').value, source_type: document.getElementById('source-type').value, 采集周期: parseInt(document.getElementById('source-interval').value) };
+            try { if (id) await api('PUT','/sources/'+id,data); else await api('POST','/sources',data); closeModal('source-modal'); loadSources(); toast('保存成功'); } catch(e) { toast(e.message,'error'); }
         };
         
-        async function toggleSource(id, enable) {
-            await api('POST', '/sources/' + id + (enable ? '/enable' : '/disable'));
-            loadSources();
-        }
+        async function toggleSource(id, enable) { await api('POST','/sources/'+id+(enable?'/enable':'/disable')); loadSources(); }
+        async function deleteSource(id) { if(!confirm('确定删除?'))return; await api('DELETE','/sources/'+id); loadSources(); toast('已删除'); }
         
-        async function deleteSource(id) {
-            if (!confirm('确定删除?')) return;
-            await api('DELETE', '/sources/' + id);
-            loadSources();
-            toast('已删除');
+        // Batch Source
+        function showBatchSourceModal() { document.getElementById('batch-source-form').reset(); closeModal('source-modal'); document.getElementById('batch-source-modal').classList.add('active'); }
+        document.getElementById('batch-source-form').onsubmit = async e => {
+            e.preventDefault();
+            const lines = document.getElementById('batch-source-data').value.trim().split('\n').filter(l=>l.trim());
+            const items = lines.map(line => { const parts = line.split('|'); return { name: parts[0], url: parts[1], source_type: parts[2]||'website', 采集周期: parseInt(parts[3])||60 }; });
+            try { const result = await api('POST','/sources/batch',items); closeModal('batch-source-modal'); loadSources(); toast('成功添加 '+result.length+' 条'); } catch(e) { toast(e.message,'error'); }
+        };
+        
+        // Import Source
+        function showImportSourceModal() { document.getElementById('import-source-preview').classList.add('hidden'); document.getElementById('import-source-modal').classList.add('active'); }
+        async function handleSourceFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const text = await file.text();
+            let data = [];
+            if (file.name.endsWith('.json')) { data = JSON.parse(text); if (!Array.isArray(data)) data = [data]; }
+            else { data = text.trim().split('\n').map(line => { const parts = line.split(','); return { name: parts[0], url: parts[1], source_type: parts[2]||'website', 采集周期: parseInt(parts[3])||60 }; }); }
+            pendingImportData.sources = data;
+            document.getElementById('import-source-content').innerHTML = data.slice(0,5).map(s=>`<div>${s.name} - ${s.url}</div>`).join('') + (data.length>5?'<div>... 还有 '+(data.length-5)+' 条</div>':'');
+            document.getElementById('import-source-preview').classList.remove('hidden');
+        }
+        async function confirmImportSource() {
+            try { const result = await api('POST','/sources/batch',pendingImportData.sources); closeModal('import-source-modal'); loadSources(); toast('成功导入 '+result.length+' 条'); } catch(e) { toast(e.message,'error'); }
         }
         
         // Proxies
         async function loadProxies() {
             const proxies = await api('GET', '/proxies');
-            document.getElementById('proxies-tbody').innerHTML = proxies.length ? proxies.map(p => `
-                <tr>
-                    <td><code>${p.ip}</code></td>
-                    <td>${p.port}</td>
-                    <td><span class="badge badge-info">${p.protocol}</span></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <div style="width:60px;height:6px;background:var(--bg);border-radius:3px;"><div style="width:${p.quality_score * 100}%;height:100%;background:${p.quality_score > 0.7 ? 'var(--success)' : p.quality_score > 0.4 ? 'var(--warning)' : 'var(--danger)'};border-radius:3px;"></div></div>
-                            <span>${(p.quality_score * 100).toFixed(0)}%</span>
-                        </div>
-                    </td>
-                    <td>${p.failure_count}</td>
-                    <td><span class="badge ${p.enabled ? 'badge-success' : 'badge-danger'}">${p.enabled ? '启用' : '禁用'}</span></td>
-                    <td><button class="btn btn-danger btn-sm" onclick="deleteProxy('${p.id}')">删除</button></td>
-                </tr>
-            `).join('') : '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-secondary);">暂无代理 <button class="btn btn-primary btn-sm" onclick="showProxyModal()">添加</button></td></tr>';
+            document.getElementById('proxies-tbody').innerHTML = proxies.length ? proxies.map(p => `<tr><td><code>${p.ip}</code></td><td>${p.port}</td><td><span class="badge badge-info">${p.protocol}</span></td><td><div style="display:flex;align-items:center;gap:8px;"><div style="width:60px;height:6px;background:var(--bg);border-radius:3px;"><div style="width:${p.quality_score*100}%;height:100%;background:${p.quality_score>0.7?'var(--success)':p.quality_score>0.4?'var(--warning)':'var(--danger)'};border-radius:3px;"></div></div><span>${(p.quality_score*100).toFixed(0)}%</span></div></td><td>${p.failure_count}</td><td><span class="badge ${p.enabled?'badge-success':'badge-danger'}">${p.enabled?'启用':'禁用'}</span></td><td><button class="btn btn-danger btn-sm" onclick="deleteProxy('${p.id}')">删除</button></td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:40px;">暂无代理</td></tr>';
         }
         
         async function showProxyModal(id) {
             document.getElementById('proxy-form').reset();
             document.getElementById('proxy-id').value = '';
-            document.getElementById('auth-fields').classList.add('hidden');
-            if (id) {
-                const p = await api('GET', '/proxies/' + id);
-                document.getElementById('proxy-id').value = p.id;
-                document.getElementById('proxy-ip').value = p.ip;
-                document.getElementById('proxy-port').value = p.port;
-                document.getElementById('proxy-protocol').value = p.protocol;
-                if (p.username) {
-                    document.getElementById('proxy-auth').value = 'basic';
-                    document.getElementById('auth-fields').classList.remove('hidden');
-                    document.getElementById('proxy-username').value = p.username;
-                    document.getElementById('proxy-password').value = p.password || '';
-                }
-            }
+            if (id) { const p = await api('GET','/proxies/'+id); document.getElementById('proxy-id').value=p.id; document.getElementById('proxy-ip').value=p.ip; document.getElementById('proxy-port').value=p.port; document.getElementById('proxy-protocol').value=p.protocol; }
             document.getElementById('proxy-modal').classList.add('active');
         }
-        
-        document.getElementById('proxy-auth').onchange = e => {
-            document.getElementById('auth-fields').classList.toggle('hidden', e.target.value === 'none');
-        };
         
         document.getElementById('proxy-form').onsubmit = async e => {
             e.preventDefault();
             const id = document.getElementById('proxy-id').value;
-            const data = {
-                ip: document.getElementById('proxy-ip').value,
-                port: parseInt(document.getElementById('proxy-port').value),
-                protocol: document.getElementById('proxy-protocol').value,
-                username: document.getElementById('proxy-auth').value === 'basic' ? document.getElementById('proxy-username').value : null,
-                password: document.getElementById('proxy-auth').value === 'basic' ? document.getElementById('proxy-password').value : null
-            };
-            try {
-                if (id) await api('PUT', '/proxies/' + id, data);
-                else await api('POST', '/proxies', data);
-                closeModal('proxy-modal');
-                loadProxies();
-                toast('保存成功');
-            } catch (e) { toast(e.message, 'error'); }
+            const data = { ip: document.getElementById('proxy-ip').value, port: parseInt(document.getElementById('proxy-port').value), protocol: document.getElementById('proxy-protocol').value };
+            try { if (id) await api('PUT','/proxies/'+id,data); else await api('POST','/proxies',data); closeModal('proxy-modal'); loadProxies(); toast('保存成功'); } catch(e) { toast(e.message,'error'); }
         };
         
-        async function deleteProxy(id) {
-            if (!confirm('确定删除?')) return;
-            await api('DELETE', '/proxies/' + id);
-            loadProxies();
-            toast('已删除');
+        async function deleteProxy(id) { if(!confirm('确定删除?'))return; await api('DELETE','/proxies/'+id); loadProxies(); toast('已删除'); }
+        
+        // Batch Proxy
+        function showBatchProxyModal() { document.getElementById('batch-proxy-form').reset(); document.getElementById('batch-proxy-modal').classList.add('active'); }
+        document.getElementById('batch-proxy-form').onsubmit = async e => {
+            e.preventDefault();
+            const lines = document.getElementById('batch-proxy-data').value.trim().split('\n').filter(l=>l.trim());
+            const items = lines.map(line => { const parts = line.split('|'); return { ip: parts[0], port: parseInt(parts[1]), protocol: parts[2]||'http' }; });
+            try { const result = await api('POST','/proxies/batch',items); closeModal('batch-proxy-modal'); loadProxies(); toast('成功添加 '+result.length+' 条'); } catch(e) { toast(e.message,'error'); }
+        };
+        
+        // Import Proxy
+        function showImportProxyModal() { document.getElementById('import-proxy-preview').classList.add('hidden'); document.getElementById('import-proxy-modal').classList.add('active'); }
+        async function handleProxyFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const text = await file.text();
+            let data = [];
+            if (file.name.endsWith('.json')) { data = JSON.parse(text); if (!Array.isArray(data)) data = [data]; }
+            else { data = text.trim().split('\n').map(line => { const parts = line.split(','); return { ip: parts[0], port: parseInt(parts[1]), protocol: parts[2]||'http' }; }); }
+            pendingImportData.proxies = data;
+            document.getElementById('import-proxy-content').innerHTML = data.slice(0,5).map(p=>`<div>${p.ip}:${p.port}</div>`).join('') + (data.length>5?'<div>... 还有 '+(data.length-5)+' 条</div>':'');
+            document.getElementById('import-proxy-preview').classList.remove('hidden');
+        }
+        async function confirmImportProxy() {
+            try { const result = await api('POST','/proxies/batch',pendingImportData.proxies); closeModal('import-proxy-modal'); loadProxies(); toast('成功导入 '+result.length+' 条'); } catch(e) { toast(e.message,'error'); }
         }
         
         // UserAgents
+        const UA_CATEGORIES = [
+            { key: 'pc_chrome', name: 'PC Chrome', icon: '💻' },
+            { key: 'pc_firefox', name: 'PC Firefox', icon: '🦊' },
+            { key: 'mobile_android', name: 'Android', icon: '📱' },
+            { key: 'mobile_ios', name: 'iOS', icon: '🍎' },
+            { key: 'mini_program', name: '小程序', icon: '�小程序' },
+            { key: 'app_ios', name: 'iOS App', icon: '📲' },
+            { key: 'app_android', name: 'Android App', icon: '📲' },
+        ];
+        
         async function loadUAs() {
             const uas = await api('GET', '/user-agents');
-            document.getElementById('uas-tbody').innerHTML = uas.length ? uas.map(u => `
-                <tr>
-                    <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;font-family:monospace;font-size:12px;">${u.ua_string}</td>
-                    <td>${u.browser || '-'}</td>
-                    <td>${u.os || '-'}</td>
-                    <td><span class="badge ${u.enabled ? 'badge-success' : 'badge-danger'}">${u.enabled ? '启用' : '禁用'}</span></td>
-                    <td><button class="btn btn-danger btn-sm" onclick="deleteUA('${u.id}')">删除</button></td>
-                </tr>
-            `).join('') : '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-secondary);">暂无UA <button class="btn btn-primary btn-sm" onclick="showUAModal()">添加</button></td></tr>';
+            document.getElementById('uas-tbody').innerHTML = uas.length ? uas.map(u => `<tr><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;font-family:monospace;font-size:12px;">${u.ua_string}</td><td>${u.browser||'-'}</td><td>${u.os||'-'}</td><td><span class="badge ${u.enabled?'badge-success':'badge-danger'}">${u.enabled?'启用':'禁用'}</span></td><td><button class="btn btn-danger btn-sm" onclick="deleteUA('${u.id}')">删除</button></td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:40px;">暂无UA</td></tr>';
         }
         
         async function showUAModal(id) {
             document.getElementById('ua-form').reset();
             document.getElementById('ua-id').value = '';
-            if (id) {
-                const u = await api('GET', '/user-agents/' + id);
-                document.getElementById('ua-id').value = u.id;
-                document.getElementById('ua-string').value = u.ua_string;
-                document.getElementById('ua-browser').value = u.browser || '';
-                document.getElementById('ua-os').value = u.os || '';
-            }
+            if (id) { const u = await api('GET','/user-agents/'+id); document.getElementById('ua-id').value=u.id; document.getElementById('ua-string').value=u.ua_string; document.getElementById('ua-browser').value=u.browser||''; document.getElementById('ua-os').value=u.os||''; }
             document.getElementById('ua-modal').classList.add('active');
         }
         
         document.getElementById('ua-form').onsubmit = async e => {
             e.preventDefault();
             const id = document.getElementById('ua-id').value;
-            const data = {
-                ua_string: document.getElementById('ua-string').value,
-                browser: document.getElementById('ua-browser').value || null,
-                os: document.getElementById('ua-os').value || null
-            };
-            try {
-                if (id) await api('PUT', '/user-agents/' + id, data);
-                else await api('POST', '/user-agents', data);
-                closeModal('ua-modal');
-                loadUAs();
-                toast('保存成功');
-            } catch (e) { toast(e.message, 'error'); }
+            const data = { ua_string: document.getElementById('ua-string').value, browser: document.getElementById('ua-browser').value||null, os: document.getElementById('ua-os').value||null };
+            try { if (id) await api('PUT','/user-agents/'+id,data); else await api('POST','/user-agents',data); closeModal('ua-modal'); loadUAs(); toast('保存成功'); } catch(e) { toast(e.message,'error'); }
         };
         
-        async function deleteUA(id) {
-            if (!confirm('确定删除?')) return;
-            await api('DELETE', '/user-agents/' + id);
-            loadUAs();
-            toast('已删除');
+        async function deleteUA(id) { if(!confirm('确定删除?'))return; await api('DELETE','/user-agents/'+id); loadUAs(); toast('已删除'); }
+        
+        // Builtin UA
+        function showBuiltinUAModal() {
+            let html = '';
+            for (const cat of UA_CATEGORIES) { html += `<div class="category-card" onclick="selectUACategory('${cat.key}')" id="ua-cat-${cat.key}"><div class="category-icon">${cat.icon}</div><div class="category-name">${cat.name}</div></div>`; }
+            document.getElementById('ua-categories').innerHTML = html;
+            document.getElementById('builtin-ua-preview').classList.add('hidden');
+            document.getElementById('builtin-ua-modal').classList.add('active');
+        }
+        
+        let selectedUACategory = null;
+        async function selectUACategory(key) {
+            document.querySelectorAll('.category-card').forEach(c=>c.classList.remove('selected'));
+            document.getElementById('ua-cat-'+key).classList.add('selected');
+            selectedUACategory = key;
+            const uas = await api('GET','/user-agents/builtin/'+key);
+            document.getElementById('selected-ua-count').textContent = uas.length;
+            document.getElementById('builtin-ua-list').innerHTML = uas.map(u=>`<div style="margin-bottom:4px;word-break:break-all;">${u.browser||'Unknown'} - ${u.os||'Unknown'}</div>`).join('');
+            document.getElementById('builtin-ua-preview').classList.remove('hidden');
+        }
+        
+        async function importBuiltinUAs() {
+            if (!selectedUACategory) return;
+            try { const result = await api('POST','/user-agents/import/'+selectedUACategory); closeModal('builtin-ua-modal'); loadUAs(); toast('成功导入 '+result.length+' 条UA'); } catch(e) { toast(e.message,'error'); }
+        }
+        
+        // Batch UA
+        function showBatchUAModal() { document.getElementById('batch-ua-form').reset(); document.getElementById('batch-ua-modal').classList.add('active'); }
+        document.getElementById('batch-ua-form').onsubmit = async e => {
+            e.preventDefault();
+            const lines = document.getElementById('batch-ua-data').value.trim().split('\n').filter(l=>l.trim());
+            const items = lines.map(line => { const parts = line.split('|'); return { ua_string: parts[0], browser: parts[1]||null, os: parts[2]||null }; });
+            try { const result = await api('POST','/user-agents/batch',items); closeModal('batch-ua-modal'); loadUAs(); toast('成功添加 '+result.length+' 条'); } catch(e) { toast(e.message,'error'); }
+        };
+        
+        // Import UA
+        function showImportUAModal() { document.getElementById('import-ua-preview').classList.add('hidden'); document.getElementById('import-ua-modal').classList.add('active'); }
+        async function handleUAFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const text = await file.text();
+            let data = [];
+            if (file.name.endsWith('.json')) { data = JSON.parse(text); if (!Array.isArray(data)) data = [data]; }
+            else { data = text.trim().split('\n').map(line => { const parts = line.split(','); return { ua_string: parts[0], browser: parts[1]||null, os: parts[2]||null }; }); }
+            pendingImportData.uas = data;
+            document.getElementById('import-ua-content').innerHTML = data.slice(0,5).map(u=>`<div style="margin-bottom:4px;word-break:break-all;">${u.ua_string.slice(0,50)}...</div>`).join('') + (data.length>5?'<div>... 还有 '+(data.length-5)+' 条</div>':'');
+            document.getElementById('import-ua-preview').classList.remove('hidden');
+        }
+        async function confirmImportUA() {
+            try { const result = await api('POST','/user-agents/batch',pendingImportData.uas); closeModal('import-ua-modal'); loadUAs(); toast('成功导入 '+result.length+' 条'); } catch(e) { toast(e.message,'error'); }
         }
         
         // Tasks
         async function loadTasks() {
-            const [tasks, sources] = await Promise.all([
-                api('GET', '/tasks'),
-                api('GET', '/sources?limit=1000')
-            ]);
-            const statusMap = { pending: 'badge-warning', running: 'badge-success', paused: 'badge-info', completed: 'badge-primary', cancelled: 'badge-danger' };
-            const statusText = { pending: '待执行', running: '运行中', paused: '已暂停', completed: '已完成', cancelled: '已取消' };
-            
+            const [tasks, sources] = await Promise.all([api('GET', '/tasks'), api('GET', '/sources?limit=1000')]);
+            const statusMap = { pending:'badge-warning', running:'badge-success', paused:'badge-info', completed:'badge-primary', cancelled:'badge-danger' };
+            const statusText = { pending:'待执行', running:'运行中', paused:'已暂停', completed:'已完成', cancelled:'已取消' };
             document.getElementById('tasks-tbody').innerHTML = tasks.length ? tasks.map(t => {
-                const taskSources = (t.source_ids || []).map(sid => sources.find(s => s.id === sid)?.name || sid.slice(0,8)).join(', ');
-                return `
-                <tr>
-                    <td><strong>${t.name}</strong></td>
-                    <td style="color:var(--text-secondary);font-size:13px;">${taskSources || '-'}</td>
-                    <td>${t.timeout}秒</td>
-                    <td><span class="badge ${statusMap[t.status] || ''}">${statusText[t.status] || t.status}</span></td>
-                    <td>
-                        ${t.status === 'running' ? '<button class="btn btn-warning btn-sm" onclick="pauseTask(\'' + t.id + '\')">暂停</button>' : ''}
-                        ${t.status === 'paused' ? '<button class="btn btn-success btn-sm" onclick="resumeTask(\'' + t.id + '\')">恢复</button>' : ''}
-                        ${!['completed', 'cancelled'].includes(t.status) ? '<button class="btn btn-danger btn-sm" onclick="cancelTask(\'' + t.id + '\')">取消</button>' : ''}
-                        <button class="btn btn-danger btn-sm" onclick="deleteTask('${t.id}')">删除</button>
-                    </td>
-                </tr>
-            `}).join('') : '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-secondary);">暂无任务 <button class="btn btn-primary btn-sm" onclick="showTaskModal()">创建</button></td></tr>';
+                const taskSources = (t.source_ids||[]).map(sid=>sources.find(s=>s.id===sid)?.name||sid.slice(0,8)).join(', ');
+                return `<tr><td><strong>${t.name}</strong></td><td style="color:var(--text-secondary);font-size:13px;">${taskSources||'-'}</td><td>${t.timeout}秒</td><td><span class="badge ${statusMap[t.status]||''}">${statusText[t.status]||t.status}</span></td><td>${t.status==='running'?'<button class="btn btn-warning btn-sm" onclick="pauseTask(\''+t.id+'\')">暂停</button>':''}${t.status==='paused'?'<button class="btn btn-success btn-sm" onclick="resumeTask(\''+t.id+'\')">恢复</button>':''}${!['completed','cancelled'].includes(t.status)?'<button class="btn btn-danger btn-sm" onclick="cancelTask(\''+t.id+'\')">取消</button>':''} <button class="btn btn-danger btn-sm" onclick="deleteTask('${t.id}')">删除</button></td></tr>`;
+            }).join('') : '<tr><td colspan="5" style="text-align:center;padding:40px;">暂无任务</td></tr>';
         }
         
         async function showTaskModal() {
@@ -1289,26 +1177,14 @@
         document.getElementById('task-form').onsubmit = async e => {
             e.preventDefault();
             const selected = Array.from(document.getElementById('task-sources').selectedOptions).map(o => o.value);
-            const data = {
-                name: document.getElementById('task-name').value,
-                source_ids: selected,
-                timeout: parseInt(document.getElementById('task-timeout').value),
-                retry_count: parseInt(document.getElementById('task-retry').value),
-                proxy_enabled: document.getElementById('task-proxy-enabled').checked,
-                ua_enabled: document.getElementById('task-ua-enabled').checked
-            };
-            try {
-                await api('POST', '/tasks', data);
-                closeModal('task-modal');
-                loadTasks();
-                toast('创建成功');
-            } catch (e) { toast(e.message, 'error'); }
+            const data = { name: document.getElementById('task-name').value, source_ids: selected, timeout: parseInt(document.getElementById('task-timeout').value), retry_count: parseInt(document.getElementById('task-retry').value) };
+            try { await api('POST','/tasks',data); closeModal('task-modal'); loadTasks(); toast('创建成功'); } catch(e) { toast(e.message,'error'); }
         };
         
-        async function pauseTask(id) { await api('POST', '/tasks/' + id + '/pause'); loadTasks(); toast('已暂停'); }
-        async function resumeTask(id) { await api('POST', '/tasks/' + id + '/resume'); loadTasks(); toast('已恢复'); }
-        async function cancelTask(id) { await api('POST', '/tasks/' + id + '/cancel'); loadTasks(); toast('已取消'); }
-        async function deleteTask(id) { if (!confirm('确定删除?')) return; await api('DELETE', '/tasks/' + id); loadTasks(); toast('已删除'); }
+        async function pauseTask(id) { await api('POST','/tasks/'+id+'/pause'); loadTasks(); toast('已暂停'); }
+        async function resumeTask(id) { await api('POST','/tasks/'+id+'/resume'); loadTasks(); toast('已恢复'); }
+        async function cancelTask(id) { await api('POST','/tasks/'+id+'/cancel'); loadTasks(); toast('已取消'); }
+        async function deleteTask(id) { if(!confirm('确定删除?'))return; await api('DELETE','/tasks/'+id); loadTasks(); toast('已删除'); }
         
         // Intelligence
         async function loadIntelligence(page = 1) {
@@ -1317,19 +1193,11 @@
             if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
             const data = await api('GET', url);
             const items = Array.isArray(data) ? data : [];
-            document.getElementById('intelligence-tbody').innerHTML = items.length ? items.map(i => `
-                <tr>
-                    <td><strong>${i.title || '-'}</strong></td>
-                    <td><span class="badge badge-primary">${i.source_id ? i.source_id.slice(0,8) : '未知'}</span></td>
-                    <td style="color:var(--text-secondary);">${i.collected_at ? new Date(i.collected_at).toLocaleString() : '-'}</td>
-                    <td>${(i.keywords || []).slice(0, 3).map(k => `<span class="badge badge-info">${k}</span>`).join(' ') || '-'}</td>
-                    <td><button class="btn btn-danger btn-sm" onclick="deleteIntelligence('${i.id}')">删除</button></td>
-                </tr>
-            `).join('') : '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-secondary);">暂无情报数据</td></tr>';
+            document.getElementById('intelligence-tbody').innerHTML = items.length ? items.map(i => `<tr><td><strong>${i.title||'-'}</strong></td><td><span class="badge badge-primary">${i.source_id?i.source_id.slice(0,8):'未知'}</span></td><td style="color:var(--text-secondary);">${i.collected_at?new Date(i.collected_at).toLocaleString():'-'}</td><td>${(i.keywords||[]).slice(0,3).map(k=>`<span class="badge badge-info">${k}</span>`).join(' ')||'-'}</td><td><button class="btn btn-danger btn-sm" onclick="deleteIntelligence('${i.id}')">删除</button></td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:40px;">暂无情报数据</td></tr>';
         }
         
         function searchIntelligence() { loadIntelligence(1); }
-        async function deleteIntelligence(id) { if (!confirm('确定删除?')) return; await api('DELETE', '/intelligence/' + id); loadIntelligence(); toast('已删除'); }
+        async function deleteIntelligence(id) { if(!confirm('确定删除?'))return; await api('DELETE','/intelligence/'+id); loadIntelligence(); toast('已删除'); }
         
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         document.querySelectorAll('.modal').forEach(m => { m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }); });

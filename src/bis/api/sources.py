@@ -62,3 +62,15 @@ def disable_source(source_id: str, db: Session = Depends(get_db)):
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")
     return source
+
+
+@router.post("/batch", response_model=List[IntelligenceSource], status_code=status.HTTP_201_CREATED)
+def create_sources_batch(data: List[IntelligenceSourceCreate], db: Session = Depends(get_db)):
+    service = SourceService(db)
+    results = []
+    for item in data:
+        try:
+            results.append(service.create(item))
+        except Exception:
+            continue
+    return results

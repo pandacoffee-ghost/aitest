@@ -44,3 +44,15 @@ def delete_proxy(proxy_id: str, db: Session = Depends(get_db)):
     service = ProxyService(db)
     if not service.delete(proxy_id):
         raise HTTPException(status_code=404, detail="Proxy not found")
+
+
+@router.post("/batch", response_model=List[Proxy], status_code=status.HTTP_201_CREATED)
+def create_proxies_batch(data: List[ProxyCreate], db: Session = Depends(get_db)):
+    service = ProxyService(db)
+    results = []
+    for item in data:
+        try:
+            results.append(service.create(item))
+        except Exception:
+            continue
+    return results
