@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Intelligence System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #333; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 0; margin-bottom: 30px; border-radius: 0 0 20px 20px; }
+        header h1 { text-align: center; font-size: 28px; }
+        
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .nav-tab { padding: 12px 24px; background: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nav-tab:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .nav-tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        
+        .panel { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: none; }
+        .panel.active { display: block; }
+        
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .panel-title { font-size: 20px; font-weight: 600; color: #2c3e50; }
+        
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; color: #555; }
+        tr:hover { background: #f8f9fa; }
+        
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+        .badge-enabled { background: #d4edda; color: #155724; }
+        .badge-disabled { background: #f8d7da; color: #721c24; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-running { background: #cce5ff; color: #004085; }
+        .badge-completed { background: #d4edda; color: #155724; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; }
+        .stat-value { font-size: 32px; font-weight: 700; color: #667eea; }
+        .stat-label { color: #777; margin-top: 5px; font-size: 14px; }
+        
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .empty-state p { margin-bottom: 15px; }
+        
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; color: white; font-size: 14px; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+        .toast.success { background: #27ae60; }
+        .toast.error { background: #e74c3c; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .nav-tabs { gap: 5px; }
+            .nav-tab { padding: 10px 16px; font-size: 13px; }
+            table { font-size: 13px; }
+            th, td { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Business Intelligence System</h1>
+    </header>
+    
+    <div class="container">
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-panel="dashboard">Dashboard</button>
+            <button class="nav-tab" data-panel="sources">情报源</button>
+            <button class="nav-tab" data-panel="proxies">代理池</button>
+            <button class="nav-tab" data-panel="useragents">UA池</button>
+            <button class="nav-tab" data-panel="tasks">任务</button>
+            <button class="nav-tab" data-panel="intelligence">情报详情</button>
+        </nav>
+        
+        <div id="dashboard" class="panel active">
+            <div class="panel-header">
+                <h2 class="panel-title">系统概览</h2>
+            </div>
+            <div class="stats" id="stats"></div>
+        </div>
+        
+        <div id="sources" class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">情报源管理</h2>
+                <button class="btn btn-primary" onclick="showSourceModal()">添加情报源</button>
+            </div>
+            <table>
+                <thead><tr><th>名称</th><th>URL</th><th>类型</th><th>采集周期</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody id="sources-tbody"></tbody>
+            </table>
+        </div>
+        
+        <div id="proxies" class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">代理池管理</h2>
+                <button class="btn btn-primary" onclick="showProxyModal()">添加代理</button>
+            </div>
+            <table>
+                <thead><tr><th>IP地址</th><th>端口</th><th>协议</th><th>质量</th><th>失败次数</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody id="proxies-tbody"></tbody>
+            </table>
+        </div>
+        
+        <div id="useragents" class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">UA池管理</h2>
+                <button class="btn btn-primary" onclick="showUAModal()">添加UA</button>
+            </div>
+            <table>
+                <thead><tr><th>UA字符串</th><th>浏览器</th><th>操作系统</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody id="uas-tbody"></tbody>
+            </table>
+        </div>
+        
+        <div id="tasks" class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">任务管理</h2>
+                <button class="btn btn-primary" onclick="showTaskModal()">创建任务</button>
+            </div>
+            <table>
+                <thead><tr><th>任务名称</th><th>超时时间</th><th>重试次数</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody id="tasks-tbody"></tbody>
+            </table>
+        </div>
+        
+        <div id="intelligence" class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">情报详情</h2>
+                <div style="display:flex;gap:10px;">
+                    <input type="text" id="search-keyword" placeholder="搜索关键词" style="padding:8px;border:1px solid #ddd;border-radius:6px;width:200px;">
+                    <button class="btn btn-primary" onclick="searchIntelligence()">搜索</button>
+                </div>
+            </div>
+            <table>
+                <thead><tr><th>标题</th><th>来源</th><th>采集时间</th><th>操作</th></tr></thead>
+                <tbody id="intelligence-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="source-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">添加情报源</h3><button class="modal-close" onclick="closeModal('source-modal')">&times;</button></div>
+            <form id="source-form"><input type="hidden" id="source-id">
+                <div class="form-group"><label>名称</label><input type="text" id="source-name" required></div>
+                <div class="form-group"><label>URL</label><input type="url" id="source-url" required></div>
+                <div class="form-group"><label>类型</label><select id="source-type"><option value="website">Website</option><option value="api">API</option><option value="rss">RSS</option></select></div>
+                <div class="form-group"><label>采集周期(分钟)</label><input type="number" id="source-interval" value="60" min="1"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">保存</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="proxy-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">添加代理</h3><button class="modal-close" onclick="closeModal('proxy-modal')">&times;</button></div>
+            <form id="proxy-form"><input type="hidden" id="proxy-id">
+                <div class="form-group"><label>IP地址</label><input type="text" id="proxy-ip" required></div>
+                <div class="form-group"><label>端口</label><input type="number" id="proxy-port" required></div>
+                <div class="form-group"><label>协议</label><select id="proxy-protocol"><option value="http">HTTP</option><option value="https">HTTPS</option><option value="socks5">SOCKS5</option></select></div>
+                <div class="form-group"><label>用户名(可选)</label><input type="text" id="proxy-username"></div>
+                <div class="form-group"><label>密码(可选)</label><input type="password" id="proxy-password"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">保存</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="ua-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">添加User-Agent</h3><button class="modal-close" onclick="closeModal('ua-modal')">&times;</button></div>
+            <form id="ua-form"><input type="hidden" id="ua-id">
+                <div class="form-group"><label>UA字符串</label><textarea id="ua-string" required></textarea></div>
+                <div class="form-group"><label>浏览器</label><input type="text" id="ua-browser" placeholder="Chrome"></div>
+                <div class="form-group"><label>操作系统</label><input type="text" id="ua-os" placeholder="Windows 10"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">保存</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">创建任务</h3><button class="modal-close" onclick="closeModal('task-modal')">&times;</button></div>
+            <form id="task-form"><input type="hidden" id="task-id">
+                <div class="form-group"><label>任务名称</label><input type="text" id="task-name" required></div>
+                <div class="form-group"><label>情报源(多选)</label><select id="task-sources" multiple style="min-height:100px;"></select></div>
+                <div class="form-group"><label>超时时间(秒)</label><input type="number" id="task-timeout" value="300" min="1" max="3600"></div>
+                <div class="form-group"><label>重试次数</label><input type="number" id="task-retry" value="3" min="0"></div>
+                <div class="form-group"><label><input type="checkbox" id="task-proxy-enabled" checked> 启用代理</label></div>
+                <div class="form-group"><label><input type="checkbox" id="task-ua-enabled" checked> 启用UA伪装</label></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">保存</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        const API_BASE = '/api/v1';
+        
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.panel).classList.add('active');
+                if (tab.dataset.panel === 'dashboard') loadDashboard();
+                if (tab.dataset.panel === 'sources') loadSources();
+                if (tab.dataset.panel === 'proxies') loadProxies();
+                if (tab.dataset.panel === 'useragents') loadUAs();
+                if (tab.dataset.panel === 'tasks') loadTasks();
+                if (tab.dataset.panel === 'intelligence') loadIntelligence();
+            });
+        });
+        
+        function toast(message, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = message;
+            t.className = 'toast ' + type + ' show';
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+        
+        async function api(method, url, body) {
+            const opts = { method, headers: { 'Content-Type': 'application/json' } };
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch(API_BASE + url, opts);
+            if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'API Error'); }
+            return method === 'DELETE' ? true : res.json();
+        }
+        
+        async function loadDashboard() {
+            const [sources, proxies, tasks] = await Promise.all([
+                api('GET', '/sources?limit=1000'),
+                api('GET', '/proxies?limit=1000'),
+                api('GET', '/tasks?limit=1000')
+            ]);
+            const enabledSources = sources.filter(s => s.enabled).length;
+            const availableProxies = proxies.filter(p => p.enabled).length;
+            const runningTasks = tasks.filter(t => t.status === 'running').length;
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card"><div class="stat-value">${sources.length}</div><div class="stat-label">情报源 (${enabledSources} 启用)</div></div>
+                <div class="stat-card"><div class="stat-value">${proxies.length}</div><div class="stat-label">代理 (${availableProxies} 可用)</div></div>
+                <div class="stat-card"><div class="stat-value">${tasks.length}</div><div class="stat-label">任务 (${runningTasks} 运行中)</div></div>
+            `;
+        }
+        
+        async function loadSources() {
+            const sources = await api('GET', '/sources');
+            document.getElementById('sources-tbody').innerHTML = sources.length ? sources.map(s => `
+                <tr>
+                    <td>${s.name}</td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${s.url}</td>
+                    <td>${s.source_type}</td>
+                    <td>${s.采集周期}分钟</td>
+                    <td><span class="badge ${s.enabled ? 'badge-enabled' : 'badge-disabled'}">${s.enabled ? '启用' : '禁用'}</span></td>
+                    <td>
+                        <button class="btn btn-sm ${s.enabled ? 'btn-warning' : 'btn-success'}" onclick="toggleSource('${s.id}', ${!s.enabled})">${s.enabled ? '禁用' : '启用'}</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSource('${s.id}')">删除</button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="6" class="empty-state"><p>暂无情报源</p><button class="btn btn-primary" onclick="showSourceModal()">添加第一个情报源</button></td></tr>';
+        }
+        
+        async function showSourceModal(id) {
+            document.getElementById('source-form').reset();
+            document.getElementById('source-id').value = '';
+            if (id) {
+                const s = await api('GET', '/sources/' + id);
+                document.getElementById('source-id').value = s.id;
+                document.getElementById('source-name').value = s.name;
+                document.getElementById('source-url').value = s.url;
+                document.getElementById('source-type').value = s.source_type;
+                document.getElementById('source-interval').value = s.采集周期;
+            }
+            document.getElementById('source-modal').classList.add('active');
+        }
+        
+        document.getElementById('source-form').onsubmit = async e => {
+            e.preventDefault();
+            const id = document.getElementById('source-id').value;
+            const data = {
+                name: document.getElementById('source-name').value,
+                url: document.getElementById('source-url').value,
+                source_type: document.getElementById('source-type').value,
+                采集周期: parseInt(document.getElementById('source-interval').value)
+            };
+            try {
+                if (id) await api('PUT', '/sources/' + id, data);
+                else await api('POST', '/sources', data);
+                closeModal('source-modal');
+                loadSources();
+                toast('保存成功');
+            } catch (e) { toast(e.message, 'error'); }
+        };
+        
+        async function toggleSource(id, enable) {
+            await api('POST', '/sources/' + id + (enable ? '/enable' : '/disable'));
+            loadSources();
+            toast(enable ? '已启用' : '已禁用');
+        }
+        
+        async function deleteSource(id) {
+            if (!confirm('确定删除?')) return;
+            await api('DELETE', '/sources/' + id);
+            loadSources();
+            toast('已删除');
+        }
+        
+        async function loadProxies() {
+            const proxies = await api('GET', '/proxies');
+            document.getElementById('proxies-tbody').innerHTML = proxies.length ? proxies.map(p => `
+                <tr>
+                    <td>${p.ip}</td>
+                    <td>${p.port}</td>
+                    <td>${p.protocol}</td>
+                    <td>${(p.quality_score * 100).toFixed(0)}%</td>
+                    <td>${p.failure_count}</td>
+                    <td><span class="badge ${p.enabled ? 'badge-enabled' : 'badge-disabled'}">${p.enabled ? '启用' : '禁用'}</span></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteProxy('${p.id}')">删除</button></td>
+                </tr>
+            `).join('') : '<tr><td colspan="7" class="empty-state"><p>暂无代理</p><button class="btn btn-primary" onclick="showProxyModal()">添加第一个代理</button></td></tr>';
+        }
+        
+        async function showProxyModal(id) {
+            document.getElementById('proxy-form').reset();
+            document.getElementById('proxy-id').value = '';
+            if (id) {
+                const p = await api('GET', '/proxies/' + id);
+                document.getElementById('proxy-id').value = p.id;
+                document.getElementById('proxy-ip').value = p.ip;
+                document.getElementById('proxy-port').value = p.port;
+                document.getElementById('proxy-protocol').value = p.protocol;
+                document.getElementById('proxy-username').value = p.username || '';
+                document.getElementById('proxy-password').value = p.password || '';
+            }
+            document.getElementById('proxy-modal').classList.add('active');
+        }
+        
+        document.getElementById('proxy-form').onsubmit = async e => {
+            e.preventDefault();
+            const id = document.getElementById('proxy-id').value;
+            const data = {
+                ip: document.getElementById('proxy-ip').value,
+                port: parseInt(document.getElementById('proxy-port').value),
+                protocol: document.getElementById('proxy-protocol').value,
+                username: document.getElementById('proxy-username').value || null,
+                password: document.getElementById('proxy-password').value || null
+            };
+            try {
+                if (id) await api('PUT', '/proxies/' + id, data);
+                else await api('POST', '/proxies', data);
+                closeModal('proxy-modal');
+                loadProxies();
+                toast('保存成功');
+            } catch (e) { toast(e.message, 'error'); }
+        };
+        
+        async function deleteProxy(id) {
+            if (!confirm('确定删除?')) return;
+            await api('DELETE', '/proxies/' + id);
+            loadProxies();
+            toast('已删除');
+        }
+        
+        async function loadUAs() {
+            const uas = await api('GET', '/user-agents');
+            document.getElementById('uas-tbody').innerHTML = uas.length ? uas.map(u => `
+                <tr>
+                    <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">${u.ua_string}</td>
+                    <td>${u.browser || '-'}</td>
+                    <td>${u.os || '-'}</td>
+                    <td><span class="badge ${u.enabled ? 'badge-enabled' : 'badge-disabled'}">${u.enabled ? '启用' : '禁用'}</span></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteUA('${u.id}')">删除</button></td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="empty-state"><p>暂无UA</p><button class="btn btn-primary" onclick="showUAModal()">添加第一个UA</button></td></tr>';
+        }
+        
+        async function showUAModal(id) {
+            document.getElementById('ua-form').reset();
+            document.getElementById('ua-id').value = '';
+            if (id) {
+                const u = await api('GET', '/user-agents/' + id);
+                document.getElementById('ua-id').value = u.id;
+                document.getElementById('ua-string').value = u.ua_string;
+                document.getElementById('ua-browser').value = u.browser || '';
+                document.getElementById('ua-os').value = u.os || '';
+            }
+            document.getElementById('ua-modal').classList.add('active');
+        }
+        
+        document.getElementById('ua-form').onsubmit = async e => {
+            e.preventDefault();
+            const id = document.getElementById('ua-id').value;
+            const data = {
+                ua_string: document.getElementById('ua-string').value,
+                browser: document.getElementById('ua-browser').value || null,
+                os: document.getElementById('ua-os').value || null
+            };
+            try {
+                if (id) await api('PUT', '/user-agents/' + id, data);
+                else await api('POST', '/user-agents', data);
+                closeModal('ua-modal');
+                loadUAs();
+                toast('保存成功');
+            } catch (e) { toast(e.message, 'error'); }
+        };
+        
+        async function deleteUA(id) {
+            if (!confirm('确定删除?')) return;
+            await api('DELETE', '/user-agents/' + id);
+            loadUAs();
+            toast('已删除');
+        }
+        
+        async function loadTasks() {
+            const [tasks, sources] = await Promise.all([
+                api('GET', '/tasks'),
+                api('GET', '/sources?limit=1000')
+            ]);
+            const statusMap = { pending: 'badge-pending', running: 'badge-running', paused: 'badge-warning', completed: 'badge-completed', cancelled: 'badge-disabled' };
+            const statusText = { pending: '待执行', running: '运行中', paused: '已暂停', completed: '已完成', cancelled: '已取消' };
+            document.getElementById('tasks-tbody').innerHTML = tasks.length ? tasks.map(t => `
+                <tr>
+                    <td>${t.name}</td>
+                    <td>${t.timeout}秒</td>
+                    <td>${t.retry_count}</td>
+                    <td><span class="badge ${statusMap[t.status] || ''}">${statusText[t.status] || t.status}</span></td>
+                    <td>
+                        ${t.status === 'running' ? '<button class="btn btn-warning btn-sm" onclick="pauseTask(\'' + t.id + '\')">暂停</button>' : ''}
+                        ${t.status === 'paused' ? '<button class="btn btn-success btn-sm" onclick="resumeTask(\'' + t.id + '\')">恢复</button>' : ''}
+                        ${!['completed', 'cancelled'].includes(t.status) ? '<button class="btn btn-danger btn-sm" onclick="cancelTask(\'' + t.id + '\')">取消</button>' : ''}
+                        <button class="btn btn-danger btn-sm" onclick="deleteTask('${t.id}')">删除</button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="empty-state"><p>暂无任务</p><button class="btn btn-primary" onclick="showTaskModal()">创建第一个任务</button></td></tr>';
+        }
+        
+        async function showTaskModal() {
+            document.getElementById('task-form').reset();
+            document.getElementById('task-id').value = '';
+            const sources = await api('GET', '/sources?limit=1000');
+            document.getElementById('task-sources').innerHTML = sources.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            document.getElementById('task-modal').classList.add('active');
+        }
+        
+        document.getElementById('task-form').onsubmit = async e => {
+            e.preventDefault();
+            const selected = Array.from(document.getElementById('task-sources').selectedOptions).map(o => o.value);
+            const data = {
+                name: document.getElementById('task-name').value,
+                source_ids: selected,
+                timeout: parseInt(document.getElementById('task-timeout').value),
+                retry_count: parseInt(document.getElementById('task-retry').value),
+                proxy_enabled: document.getElementById('task-proxy-enabled').checked,
+                ua_enabled: document.getElementById('task-ua-enabled').checked
+            };
+            try {
+                await api('POST', '/tasks', data);
+                closeModal('task-modal');
+                loadTasks();
+                toast('创建成功');
+            } catch (e) { toast(e.message, 'error'); }
+        };
+        
+        async function pauseTask(id) { await api('POST', '/tasks/' + id + '/pause'); loadTasks(); toast('已暂停'); }
+        async function resumeTask(id) { await api('POST', '/tasks/' + id + '/resume'); loadTasks(); toast('已恢复'); }
+        async function cancelTask(id) { await api('POST', '/tasks/' + id + '/cancel'); loadTasks(); toast('已取消'); }
+        
+        async function deleteTask(id) {
+            if (!confirm('确定删除?')) return;
+            await api('DELETE', '/tasks/' + id);
+            loadTasks();
+            toast('已删除');
+        }
+        
+        async function loadIntelligence(page = 1) {
+            const keyword = document.getElementById('search-keyword').value;
+            let url = `/intelligence?page=${page}&page_size=20`;
+            if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+            const data = await api('GET', url);
+            const items = Array.isArray(data) ? data : [];
+            document.getElementById('intelligence-tbody').innerHTML = items.length ? items.map(i => `
+                <tr>
+                    <td>${i.title || '-'}</td>
+                    <td>${i.source_id || '-'}</td>
+                    <td>${i.collected_at ? new Date(i.collected_at).toLocaleString() : '-'}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteIntelligence('${i.id}')">删除</button></td>
+                </tr>
+            `).join('') : '<tr><td colspan="4" class="empty-state"><p>暂无情报数据</p></td></tr>';
+        }
+        
+        function searchIntelligence() { loadIntelligence(1); }
+        
+        async function deleteIntelligence(id) {
+            if (!confirm('确定删除?')) return;
+            await api('DELETE', '/intelligence/' + id);
+            loadIntelligence();
+            toast('已删除');
+        }
+        
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
+        document.querySelectorAll('.modal').forEach(m => {
+            m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+        });
+        
+        loadDashboard();
+    </script>
+</body>
+</html>

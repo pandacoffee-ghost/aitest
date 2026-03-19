@@ -1,0 +1,35 @@
+database:
+  url: "sqlite:///./bis.db"
+  echo: false
+
+redis:
+  url: "redis://localhost:6379/0"
+  enabled: false
+
+scheduler:
+  timezone: "UTC"
+  max_instances: 3
+
+scraper:
+  default_timeout: 30
+  max_retries: 3
+  proxy_test_timeout: 5
+
+proxy:
+  max_failure_count: 3
+  quality_threshold: 0.5
+  test_url: "http://httpbin.org/ip"
+
+task:
+  default_timeout: 300
+  default_retry_count: 3
+  max_concurrent: 10
+
+intelligence:
+  deduplication_enabled: true
+  summary_max_length: 500
+
+app:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
