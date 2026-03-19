@@ -102,11 +102,21 @@ class UserAgent(UserAgentBase):
 class CollectionTaskBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
     source_ids: List[str] = Field(default_factory=list)
+    
+    url: Optional[str] = Field(None, max_length=2000)
+    charset: str = Field(default="utf-8")
+    list_selector: Optional[str] = None
+    title_selector: Optional[str] = None
+    content_selector: Optional[str] = None
+    link_selector: Optional[str] = None
+    date_selector: Optional[str] = None
+    keywords: List[str] = Field(default_factory=list)
+    
     proxy_enabled: bool = True
     ua_enabled: bool = True
     cron_expression: Optional[str] = Field(None, max_length=100)
-    timeout: int = Field(default=300, ge=1, le=3600)
-    retry_count: int = Field(default=3, ge=0)
+    timeout: int = Field(default=30, ge=5, le=300)
+    retry_count: int = Field(default=2, ge=0, le=5)
 
 
 class CollectionTaskCreate(CollectionTaskBase):
@@ -116,11 +126,19 @@ class CollectionTaskCreate(CollectionTaskBase):
 class CollectionTaskUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=200)
     source_ids: Optional[List[str]] = None
+    url: Optional[str] = None
+    charset: Optional[str] = None
+    list_selector: Optional[str] = None
+    title_selector: Optional[str] = None
+    content_selector: Optional[str] = None
+    link_selector: Optional[str] = None
+    date_selector: Optional[str] = None
+    keywords: Optional[List[str]] = None
     proxy_enabled: Optional[bool] = None
     ua_enabled: Optional[bool] = None
     cron_expression: Optional[str] = None
-    timeout: Optional[int] = Field(None, ge=1, le=3600)
-    retry_count: Optional[int] = Field(None, ge=0)
+    timeout: Optional[int] = Field(None, ge=5, le=300)
+    retry_count: Optional[int] = Field(None, ge=0, le=5)
 
 
 class CollectionTask(CollectionTaskBase):

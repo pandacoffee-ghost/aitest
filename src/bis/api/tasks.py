@@ -89,6 +89,32 @@ def run_task(task_id: str, db: Session = Depends(get_db)):
         task = service.run_now(task_id)
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
+        
+        import asyncio
+        from bis.services.scraper_service import ScraperService
+        
+        def execute_in_background():
+            db_session = next(get_db())
+            scraper = ScraperService(db_session)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                items = loop.run_until_complete(scraper.execute_task(task))
+                service = TaskService(db_session)
+                service.mark_completed(task_id)
+            except Exception as e:
+                print(f"Task execution error: {e}")
+                service = TaskService(db_session)
+                service.mark_completed(task_id)
+            finally:
+                loop.close()
+                db_session.close()
+        
+        import threading
+        thread = threading.Thread(target=execute_in_background)
+        thread.daemon = True
+        thread.start()
+        
         return task
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

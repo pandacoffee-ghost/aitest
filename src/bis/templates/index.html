@@ -866,15 +866,33 @@
     <!-- Modal: Task -->
     <div id="task-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h3 class="modal-title">创建任务</h3><button class="modal-close" onclick="closeModal('task-modal')">&times;</button></div>
+            <div class="modal-header"><h3 class="modal-title" id="task-modal-title">创建任务</h3><button class="modal-close" onclick="closeModal('task-modal')">&times;</button></div>
             <form id="task-form"><input type="hidden" id="task-id">
                 <div class="form-group"><label>任务名称</label><input type="text" id="task-name" required placeholder="每日新闻采集"></div>
-                <div class="form-group"><label>关联情报源</label><select id="task-sources" multiple style="min-height:100px;"></select></div>
+                <div class="form-group"><label>关联情报源(可多选)</label><select id="task-sources" multiple style="min-height:80px;"></select></div>
                 <div class="form-row">
-                    <div class="form-group"><label>超时时间(秒)</label><input type="number" id="task-timeout" value="300" min="1" max="3600"></div>
-                    <div class="form-group"><label>重试次数</label><input type="number" id="task-retry" value="3" min="0"></div>
+                    <div class="form-group"><label>采集URL</label><input type="text" id="task-url" placeholder="https://example.com/news"></div>
+                    <div class="form-group"><label>页面编码</label><select id="task-charset"><option value="utf-8">UTF-8</option><option value="gbk">GBK</option><option value="gb2312">GB2312</option></select></div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px;">创建</button>
+                <div class="form-group"><label>列表选择器(CSS)</label><input type="text" id="task-list-selector" placeholder=".article-list .item"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>标题选择器</label><input type="text" id="task-title-selector" placeholder=".title"></div>
+                    <div class="form-group"><label>内容选择器</label><input type="text" id="task-content-selector" placeholder=".content"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>链接选择器</label><input type="text" id="task-link-selector" placeholder="a"></div>
+                    <div class="form-group"><label>日期选择器</label><input type="text" id="task-date-selector" placeholder=".date"></div>
+                </div>
+                <div class="form-group"><label>关键字过滤(逗号分隔)</label><input type="text" id="task-keywords" placeholder="新闻,政策,市场"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>超时时间(秒)</label><input type="number" id="task-timeout" value="30" min="5" max="300"></div>
+                    <div class="form-group"><label>重试次数</label><input type="number" id="task-retry" value="2" min="0" max="5"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label><input type="checkbox" id="task-proxy-enabled" checked> 使用代理</label></div>
+                    <div class="form-group"><label><input type="checkbox" id="task-ua-enabled" checked> 使用UA伪装</label></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px;" id="task-submit-btn">创建</button>
             </form>
         </div>
     </div>
@@ -1176,18 +1194,46 @@
         async function showTaskModal(id) {
             document.getElementById('task-form').reset();
             document.getElementById('task-id').value = '';
+            document.getElementById('task-url').value = '';
+            document.getElementById('task-charset').value = 'utf-8';
+            document.getElementById('task-list-selector').value = '';
+            document.getElementById('task-title-selector').value = '';
+            document.getElementById('task-content-selector').value = '';
+            document.getElementById('task-link-selector').value = '';
+            document.getElementById('task-date-selector').value = '';
+            document.getElementById('task-keywords').value = '';
+            document.getElementById('task-timeout').value = 30;
+            document.getElementById('task-retry').value = 2;
+            document.getElementById('task-proxy-enabled').checked = true;
+            document.getElementById('task-ua-enabled').checked = true;
+            
             const sources = await api('GET', '/sources?limit=1000');
             document.getElementById('task-sources').innerHTML = sources.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            
             if (id) {
                 const t = await api('GET', '/tasks/'+id);
+                document.getElementById('task-modal-title').textContent = '编辑任务';
+                document.getElementById('task-submit-btn').textContent = '更新';
                 document.getElementById('task-id').value = t.id;
                 document.getElementById('task-name').value = t.name;
-                document.getElementById('task-timeout').value = t.timeout;
-                document.getElementById('task-retry').value = t.retry_count;
+                document.getElementById('task-url').value = t.url || '';
+                document.getElementById('task-list-selector').value = t.list_selector || '';
+                document.getElementById('task-title-selector').value = t.title_selector || '';
+                document.getElementById('task-content-selector').value = t.content_selector || '';
+                document.getElementById('task-link-selector').value = t.link_selector || '';
+                document.getElementById('task-date-selector').value = t.date_selector || '';
+                document.getElementById('task-keywords').value = (t.keywords || []).join(',');
+                document.getElementById('task-timeout').value = t.timeout || 30;
+                document.getElementById('task-retry').value = t.retry_count || 2;
+                document.getElementById('task-proxy-enabled').checked = t.proxy_enabled !== false;
+                document.getElementById('task-ua-enabled').checked = t.ua_enabled !== false;
                 const selected = t.source_ids || [];
                 Array.from(document.getElementById('task-sources').options).forEach(opt => {
                     if (selected.includes(opt.value)) opt.selected = true;
                 });
+            } else {
+                document.getElementById('task-modal-title').textContent = '创建任务';
+                document.getElementById('task-submit-btn').textContent = '创建';
             }
             document.getElementById('task-modal').classList.add('active');
         }
@@ -1196,7 +1242,23 @@
             e.preventDefault();
             const id = document.getElementById('task-id').value;
             const selected = Array.from(document.getElementById('task-sources').selectedOptions).map(o => o.value);
-            const data = { name: document.getElementById('task-name').value, source_ids: selected, timeout: parseInt(document.getElementById('task-timeout').value), retry_count: parseInt(document.getElementById('task-retry').value) };
+            const keywords = document.getElementById('task-keywords').value.split(',').map(k => k.trim()).filter(k => k);
+            const data = {
+                name: document.getElementById('task-name').value,
+                source_ids: selected,
+                url: document.getElementById('task-url').value,
+                charset: document.getElementById('task-charset').value,
+                list_selector: document.getElementById('task-list-selector').value,
+                title_selector: document.getElementById('task-title-selector').value,
+                content_selector: document.getElementById('task-content-selector').value,
+                link_selector: document.getElementById('task-link-selector').value,
+                date_selector: document.getElementById('task-date-selector').value,
+                keywords: keywords,
+                timeout: parseInt(document.getElementById('task-timeout').value),
+                retry_count: parseInt(document.getElementById('task-retry').value),
+                proxy_enabled: document.getElementById('task-proxy-enabled').checked,
+                ua_enabled: document.getElementById('task-ua-enabled').checked
+            };
             try { 
                 if (id) await api('PUT', '/tasks/'+id, data);
                 else await api('POST', '/tasks', data);
