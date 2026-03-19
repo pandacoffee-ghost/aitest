@@ -874,14 +874,43 @@
                     <div class="form-group"><label>采集URL</label><input type="text" id="task-url" placeholder="https://example.com/news"></div>
                     <div class="form-group"><label>页面编码</label><select id="task-charset"><option value="utf-8">UTF-8</option><option value="gbk">GBK</option><option value="gb2312">GB2312</option></select></div>
                 </div>
-                <div class="form-group"><label>列表选择器(CSS)</label><input type="text" id="task-list-selector" placeholder=".article-list .item"></div>
-                <div class="form-row">
-                    <div class="form-group"><label>标题选择器</label><input type="text" id="task-title-selector" placeholder=".title"></div>
-                    <div class="form-group"><label>内容选择器</label><input type="text" id="task-content-selector" placeholder=".content"></div>
+                <div class="form-group"><label>列表选择器</label>
+                    <div style="display:flex;gap:8px;">
+                        <select id="task-list-selector-type" style="width:100px;">
+                            <option value="css">CSS</option>
+                            <option value="xpath">XPath</option>
+                            <option value="regex">正则</option>
+                        </select>
+                        <input type="text" id="task-list-selector" placeholder=".article-list .item 或 //div[@class='item']" style="flex:1;">
+                    </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>链接选择器</label><input type="text" id="task-link-selector" placeholder="a"></div>
-                    <div class="form-group"><label>日期选择器</label><input type="text" id="task-date-selector" placeholder=".date"></div>
+                    <div class="form-group"><label>标题选择器</label>
+                        <div style="display:flex;gap:8px;">
+                            <select id="task-title-selector-type" style="width:100px;"><option value="css">CSS</option><option value="xpath">XPath</option><option value="regex">正则</option></select>
+                            <input type="text" id="task-title-selector" placeholder=".title" style="flex:1;">
+                        </div>
+                    </div>
+                    <div class="form-group"><label>内容选择器</label>
+                        <div style="display:flex;gap:8px;">
+                            <select id="task-content-selector-type" style="width:100px;"><option value="css">CSS</option><option value="xpath">XPath</option><option value="regex">正则</option></select>
+                            <input type="text" id="task-content-selector" placeholder=".content" style="flex:1;">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>链接选择器</label>
+                        <div style="display:flex;gap:8px;">
+                            <select id="task-link-selector-type" style="width:100px;"><option value="css">CSS</option><option value="xpath">XPath</option></select>
+                            <input type="text" id="task-link-selector" placeholder="a" style="flex:1;">
+                        </div>
+                    </div>
+                    <div class="form-group"><label>日期选择器</label>
+                        <div style="display:flex;gap:8px;">
+                            <select id="task-date-selector-type" style="width:100px;"><option value="css">CSS</option><option value="xpath">XPath</option></select>
+                            <input type="text" id="task-date-selector" placeholder=".date" style="flex:1;">
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group"><label>关键字过滤(逗号分隔)</label><input type="text" id="task-keywords" placeholder="新闻,政策,市场"></div>
                 <div class="form-row">

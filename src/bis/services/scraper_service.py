@@ -4,10 +4,11 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from bs4 import BeautifulSoup
+from lxml import etree
 import re
+import base64
 
 from bis.models.models import CollectionTaskModel, IntelligenceDetailModel
-from bis.models.schemas import IntelligenceDetailBase
 from bis.repositories.repositories import ProxyRepository, UserAgentRepository, IntelligenceRepository, SourceRepository
 from bis.core.config import get_settings
 
@@ -31,9 +32,10 @@ class ScraperService:
         
         for attempt in range(retry_count):
             try:
-                content = await self.fetch_page(task)
-                if content:
-                    items = self.parse_content(task, content)
+                result = await self.fetch_page(task)
+                if result:
+                    html, screenshot = result
+                    items = self.parse_content(task, html, screenshot)
                     if items:
                         break
             except Exception as e:
@@ -42,7 +44,7 @@ class ScraperService:
                     
         return items
     
-    async def fetch_page(self, task: CollectionTaskModel) -> Optional[str]:
+    async def fetch_page(self, task: CollectionTaskModel) -> Optional[tuple]:
         headers = {}
         if task.ua_enabled:
             ua = self.get_random_ua()
@@ -59,12 +61,24 @@ class ScraperService:
                 proxy_url += f"{proxy.ip}:{proxy.port}"
         
         timeout = task.timeout or 30
+        screenshot = None
         
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            proxies = {"http": proxy_url, "https": proxy_url} if proxy_url else None
+        async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+            proxies = {"http://": proxy_url, "https://": proxy_url} if proxy_url else None
             response = await client.get(task.url, headers=headers, proxies=proxies)
             response.raise_for_status()
-            return response.text
+            html = response.text
+            
+            if task.do_screenshot:
+                try:
+                    screenshot = await self.take_screenshot(task.url, proxy_url, headers)
+                except Exception as e:
+                    print(f"Screenshot failed: {e}")
+            
+            return html, screenshot
+    
+    async def take_screenshot(self, url: str, proxy_url: str, headers: dict) -> Optional[str]:
+        return None
     
     def get_random_ua(self):
         import random
@@ -76,25 +90,26 @@ class ScraperService:
         proxies = self.proxy_repo.get_available()
         return random.choice(proxies) if proxies else None
     
-    def parse_content(self, task: CollectionTaskModel, html: str) -> List[IntelligenceDetailModel]:
+    def parse_content(self, task: CollectionTaskModel, html: str, screenshot: Optional[str] = None) -> List[IntelligenceDetailModel]:
         items = []
-        charset = task.charset or 'utf-8'
         
         try:
-            soup = BeautifulSoup(html, 'html.parser')
+            soup = BeautifulSoup(html, 'lxml')
         except Exception:
-            return items
+            soup = BeautifulSoup(html, 'html.parser')
         
         selector = task.list_selector or 'article'
-        elements = soup.select(selector)
+        selector_type = task.list_selector_type or 'css'
+        
+        elements = self.select_elements(soup, selector, selector_type)
         
         keywords = [k.lower() for k in (task.keywords or [])]
         
         for element in elements:
-            title = self.extract_text(element, task.title_selector)
-            content = self.extract_text(element, task.content_selector)
-            link = self.extract_link(element, task.link_selector)
-            date = self.extract_text(element, task.date_selector)
+            title = self.extract_text(element, task.title_selector, task.title_selector_type)
+            content = self.extract_text(element, task.content_selector, task.content_selector_type)
+            link = self.extract_link(element, task.link_selector, task.link_selector_type)
+            date = self.extract_text(element, task.date_selector, task.date_selector_type)
             
             if not title and not content:
                 continue
@@ -103,16 +118,21 @@ class ScraperService:
             if keywords and not any(k in title_lower for k in keywords):
                 continue
             
+            raw_data = {
+                'link': link,
+                'date': date,
+                'task_id': task.id,
+                'url': task.url,
+            }
+            
+            if screenshot:
+                raw_data['screenshot'] = screenshot
+            
             item = IntelligenceDetailModel(
                 source_id=task.source_ids[0] if task.source_ids else None,
                 title=title,
                 content=content,
-                raw_data={
-                    'link': link,
-                    'date': date,
-                    'task_id': task.id,
-                    'url': task.url,
-                },
+                raw_data=raw_data,
                 collected_at=datetime.utcnow(),
             )
             
@@ -131,14 +151,31 @@ class ScraperService:
         
         return items
     
-    def extract_text(self, element, selector: str) -> Optional[str]:
+    def select_elements(self, soup, selector: str, selector_type: str) -> List:
+        if not selector:
+            return []
+        
+        try:
+            if selector_type == 'xpath':
+                return soup.xpath(selector) if hasattr(soup, 'xpath') else []
+            elif selector_type == 'regex':
+                return []
+            else:
+                return soup.select(selector)
+        except Exception:
+            return []
+    
+    def extract_text(self, element, selector: str, selector_type: str = 'css') -> Optional[str]:
         if not selector:
             return None
         try:
-            if selector.startswith('//') or selector.startswith('/'):
-                found = element.xpath(selector) if hasattr(element, 'xpath') else None
-                if found:
-                    return str(found[0]) if found else None
+            if selector_type == 'xpath':
+                if hasattr(element, 'xpath'):
+                    found = element.xpath(selector)
+                    if found:
+                        return str(found[0]) if isinstance(found, list) else str(found)
+            elif selector_type == 'regex':
+                return None
             else:
                 selected = element.select(selector)
                 if selected:
@@ -147,14 +184,16 @@ class ScraperService:
             pass
         return None
     
-    def extract_link(self, element, selector: str) -> Optional[str]:
+    def extract_link(self, element, selector: str, selector_type: str = 'css') -> Optional[str]:
         if not selector:
             return None
         try:
-            if selector.startswith('//') or selector.startswith('/'):
-                found = element.xpath(selector) if hasattr(element, 'xpath') else None
-                if found:
-                    return str(found[0]) if found else None
+            if selector_type == 'xpath':
+                if hasattr(element, 'xpath'):
+                    found = element.xpath(selector)
+                    if found and isinstance(found, list) and len(found) > 0:
+                        href = found[0].get('href') if hasattr(found[0], 'get') else str(found[0])
+                        return href
             else:
                 selected = element.select(selector)
                 if selected and selected[0].get('href'):

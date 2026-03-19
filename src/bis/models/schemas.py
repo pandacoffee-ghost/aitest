@@ -99,18 +99,37 @@ class UserAgent(UserAgentBase):
         from_attributes = True
 
 
+class SelectorType(str, Enum):
+    CSS = "css"
+    XPATH = "xpath"
+    REGEX = "regex"
+
+
 class CollectionTaskBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
     source_ids: List[str] = Field(default_factory=list)
     
     url: Optional[str] = Field(None, max_length=2000)
     charset: str = Field(default="utf-8")
+    
     list_selector: Optional[str] = None
+    list_selector_type: SelectorType = SelectorType.CSS
+    
     title_selector: Optional[str] = None
+    title_selector_type: SelectorType = SelectorType.CSS
+    
     content_selector: Optional[str] = None
+    content_selector_type: SelectorType = SelectorType.CSS
+    
     link_selector: Optional[str] = None
+    link_selector_type: SelectorType = SelectorType.CSS
+    
     date_selector: Optional[str] = None
+    date_selector_type: SelectorType = SelectorType.CSS
+    
     keywords: List[str] = Field(default_factory=list)
+    
+    do_screenshot: bool = False
     
     proxy_enabled: bool = True
     ua_enabled: bool = True
@@ -129,11 +148,17 @@ class CollectionTaskUpdate(BaseModel):
     url: Optional[str] = None
     charset: Optional[str] = None
     list_selector: Optional[str] = None
+    list_selector_type: Optional[SelectorType] = None
     title_selector: Optional[str] = None
+    title_selector_type: Optional[SelectorType] = None
     content_selector: Optional[str] = None
+    content_selector_type: Optional[SelectorType] = None
     link_selector: Optional[str] = None
+    link_selector_type: Optional[SelectorType] = None
     date_selector: Optional[str] = None
+    date_selector_type: Optional[SelectorType] = None
     keywords: Optional[List[str]] = None
+    do_screenshot: Optional[bool] = None
     proxy_enabled: Optional[bool] = None
     ua_enabled: Optional[bool] = None
     cron_expression: Optional[str] = None
@@ -177,12 +202,6 @@ class IntelligenceSearchQuery(BaseModel):
     end_date: Optional[datetime] = None
     page: int = Field(default=1, ge=1)
     page_size: int = Field(default=20, ge=1, le=100)
-
-
-class SelectorType(str, Enum):
-    CSS = "css"
-    XPATH = "xpath"
-    REGEX = "regex"
 
 
 class KeywordMatchType(str, Enum):

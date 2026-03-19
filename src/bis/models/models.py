@@ -84,12 +84,25 @@ class CollectionTaskModel(Base):
     
     url = Column(String(2000), nullable=True)
     charset = Column(String(20), default="utf-8")
+    
     list_selector = Column(String(500), nullable=True)
+    list_selector_type = Column(String(20), default="css")
+    
     title_selector = Column(String(500), nullable=True)
+    title_selector_type = Column(String(20), default="css")
+    
     content_selector = Column(String(500), nullable=True)
+    content_selector_type = Column(String(20), default="css")
+    
     link_selector = Column(String(500), nullable=True)
+    link_selector_type = Column(String(20), default="css")
+    
     date_selector = Column(String(500), nullable=True)
+    date_selector_type = Column(String(20), default="css")
+    
     keywords = Column(JSON, default=list)
+    
+    do_screenshot = Column(Boolean, default=False)
     
     proxy_enabled = Column(Boolean, default=True)
     ua_enabled = Column(Boolean, default=True)
