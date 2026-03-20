@@ -71,6 +71,23 @@ class TaskRepository(BaseRepository[CollectionTaskModel]):
         rule_id: Optional[str] = None,
         q: Optional[str] = None,
     ) -> List[CollectionTaskModel]:
+        query = self._build_filtered_query(status=status, rule_id=rule_id, q=q)
+        return query.offset(skip).limit(limit).all()
+
+    def count_filtered(
+        self,
+        status: Optional[str] = None,
+        rule_id: Optional[str] = None,
+        q: Optional[str] = None,
+    ) -> int:
+        return self._build_filtered_query(status=status, rule_id=rule_id, q=q).count()
+
+    def _build_filtered_query(
+        self,
+        status: Optional[str] = None,
+        rule_id: Optional[str] = None,
+        q: Optional[str] = None,
+    ):
         query = self.db.query(self.model)
         if status:
             query = query.filter(self.model.status == status)
@@ -78,7 +95,7 @@ class TaskRepository(BaseRepository[CollectionTaskModel]):
             query = query.filter(self.model.rule_id == rule_id)
         if q:
             query = query.filter(self.model.name.ilike(f"%{q}%"))
-        return query.offset(skip).limit(limit).all()
+        return query
 
 
 class IntelligenceRepository(BaseRepository[IntelligenceDetailModel]):
@@ -128,6 +145,13 @@ class TaskRunRepository(BaseRepository[CollectionTaskRunModel]):
             .all()
         )
 
+    def count_by_status(self, task_id: str, status: str) -> int:
+        return (
+            self.db.query(self.model)
+            .filter(self.model.task_id == task_id, self.model.status == status)
+            .count()
+        )
+
 
 class RuleRepository(BaseRepository[CollectionRuleModel]):
     def __init__(self, db: Session):
@@ -143,9 +167,24 @@ class RuleRepository(BaseRepository[CollectionRuleModel]):
         source_id: Optional[str] = None,
         q: Optional[str] = None,
     ) -> List[CollectionRuleModel]:
+        query = self._build_filtered_query(source_id=source_id, q=q)
+        return query.offset(skip).limit(limit).all()
+
+    def count_filtered(
+        self,
+        source_id: Optional[str] = None,
+        q: Optional[str] = None,
+    ) -> int:
+        return self._build_filtered_query(source_id=source_id, q=q).count()
+
+    def _build_filtered_query(
+        self,
+        source_id: Optional[str] = None,
+        q: Optional[str] = None,
+    ):
         query = self.db.query(self.model)
         if source_id:
             query = query.filter(self.model.source_id == source_id)
         if q:
             query = query.filter(self.model.name.ilike(f"%{q}%"))
-        return query.offset(skip).limit(limit).all()
+        return query

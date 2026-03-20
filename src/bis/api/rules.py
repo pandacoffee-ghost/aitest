@@ -7,6 +7,8 @@ from bis.models.schemas import (
     CollectionRuleCreate,
     CollectionRuleUpdate,
     CollectionRule,
+    RuleListResponse,
+    RulePreviewDebug,
     RulePreviewRequest,
     RulePreviewResponse,
 )
@@ -21,7 +23,7 @@ def create_rule(data: CollectionRuleCreate, db: Session = Depends(get_db)):
     return service.create(data)
 
 
-@router.get("", response_model=List[CollectionRule])
+@router.get("", response_model=RuleListResponse)
 def list_rules(
     skip: int = 0,
     limit: int = 100,
@@ -36,7 +38,7 @@ def list_rules(
 @router.get("/source/{source_id}", response_model=List[CollectionRule])
 def list_rules_by_source(source_id: str, db: Session = Depends(get_db)):
     service = RuleService(db)
-    return service.get_all(source_id=source_id)
+    return service.get_all(source_id=source_id).items
 
 
 @router.get("/{rule_id}", response_model=CollectionRule)
@@ -89,4 +91,18 @@ def preview_rule(data: RulePreviewRequest, db: Session = Depends(get_db)):
         items, stats = service.preview(data)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-    return RulePreviewResponse(count=len(items), items=items, **stats)
+    debug = RulePreviewDebug(
+        title_hits=stats["title_hits"],
+        content_hits=stats["content_hits"],
+        link_hits=stats["link_hits"],
+        date_hits=stats["date_hits"],
+        problem_samples=stats["problem_samples"],
+    )
+    return RulePreviewResponse(
+        count=len(items),
+        matched_blocks=stats["matched_blocks"],
+        empty_title_count=stats["empty_title_count"],
+        empty_content_count=stats["empty_content_count"],
+        debug=debug,
+        items=items,
+    )

@@ -5,8 +5,8 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from bis.models.models import CollectionTaskModel, CollectionTaskRunModel, IntelligenceDetailModel, TaskRunStatus, TaskStatus
-from bis.models.schemas import CollectionTaskCreate, CollectionTaskUpdate, TaskRunSummary
-from bis.repositories.repositories import IntelligenceRepository, TaskRepository, TaskRunRepository
+from bis.models.schemas import CollectionTaskCreate, CollectionTaskUpdate, TaskListResponse, TaskRunSummary
+from bis.repositories.repositories import IntelligenceRepository, RuleRepository, SourceRepository, TaskRepository, TaskRunRepository
 
 
 class TaskService:
@@ -15,6 +15,8 @@ class TaskService:
         self.repo = TaskRepository(db)
         self.run_repo = TaskRunRepository(db)
         self.intelligence_repo = IntelligenceRepository(db)
+        self.rule_repo = RuleRepository(db)
+        self.source_repo = SourceRepository(db)
 
     def create(self, data: CollectionTaskCreate) -> CollectionTaskModel:
         model = CollectionTaskModel(
@@ -42,6 +44,7 @@ class TaskService:
             retry_count=data.retry_count,
             status=TaskStatus.PENDING.value,
         )
+        self._validate_task_configuration(model)
         return self.repo.create(model)
 
     def get_by_id(self, id: str) -> Optional[CollectionTaskModel]:
@@ -54,8 +57,10 @@ class TaskService:
         status: Optional[str] = None,
         rule_id: Optional[str] = None,
         q: Optional[str] = None,
-    ) -> List[CollectionTaskModel]:
-        return self.repo.get_filtered(skip=skip, limit=limit, status=status, rule_id=rule_id, q=q)
+    ) -> TaskListResponse:
+        items = self.repo.get_filtered(skip=skip, limit=limit, status=status, rule_id=rule_id, q=q)
+        total = self.repo.count_filtered(status=status, rule_id=rule_id, q=q)
+        return TaskListResponse(total=total, items=items)
 
     def bind_rule(self, task_ids: List[str], rule_id: str) -> List[CollectionTaskModel]:
         results = []
@@ -121,6 +126,8 @@ class TaskService:
             finished_at=latest_run.finished_at,
             items_fetched=latest_run.items_fetched,
             items_collected=latest_run.items_collected,
+            success_count=self.run_repo.count_by_status(id, TaskRunStatus.COMPLETED.value),
+            failure_count=self.run_repo.count_by_status(id, TaskRunStatus.FAILED.value),
             error_message=latest_run.error_message,
         )
 
@@ -133,6 +140,7 @@ class TaskService:
         for field, value in update_data.items():
             setattr(model, field, value)
 
+        self._validate_task_configuration(model)
         return self.repo.update(model)
 
     def delete(self, id: str) -> bool:
@@ -276,3 +284,30 @@ class TaskService:
     def _generate_dedup_key(self, task: CollectionTaskModel, item: IntelligenceDetailModel) -> str:
         content = f"{task.id}:{item.title}:{item.raw_data.get('link') if item.raw_data else None}:{item.content}"
         return hashlib.md5(content.encode()).hexdigest()
+
+    def _validate_task_configuration(self, task: CollectionTaskModel) -> None:
+        if task.rule_id and not self.rule_repo.get_by_id(task.rule_id):
+            raise ValueError("Referenced rule does not exist.")
+
+        if task.source_ids:
+            sources = self.source_repo.get_by_ids(task.source_ids)
+            if len(sources) != len(task.source_ids):
+                raise ValueError("One or more referenced sources do not exist.")
+
+        has_source = bool(task.source_ids)
+        has_rule = bool(task.rule_id)
+        has_url = bool(task.url)
+        has_inline_selectors = any(
+            [
+                task.list_selector,
+                task.title_selector,
+                task.content_selector,
+                task.link_selector,
+                task.date_selector,
+            ]
+        )
+
+        if not any([has_source, has_rule, has_url, has_inline_selectors]):
+            raise ValueError(
+                "Task configuration is not runnable: provide a URL, source, rule, or inline selectors."
+            )

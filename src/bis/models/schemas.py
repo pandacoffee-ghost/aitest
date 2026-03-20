@@ -214,7 +214,14 @@ class TaskRunSummary(BaseModel):
     finished_at: Optional[datetime] = None
     items_fetched: int = 0
     items_collected: int = 0
+    success_count: int = 0
+    failure_count: int = 0
     error_message: Optional[str] = None
+
+
+class TaskListResponse(BaseModel):
+    total: int
+    items: List["CollectionTask"]
 
 
 class IntelligenceDetailBase(BaseModel):
@@ -320,9 +327,22 @@ class CollectionRule(CollectionRuleBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class RuleListResponse(BaseModel):
+    total: int
+    items: List["CollectionRule"]
+
+
 class RulePreviewRequest(CollectionRuleBase):
     url: Optional[str] = Field(None, max_length=2000)
     raw_html: Optional[str] = None
+
+
+class RulePreviewDebug(BaseModel):
+    title_hits: int = 0
+    content_hits: int = 0
+    link_hits: int = 0
+    date_hits: int = 0
+    problem_samples: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class RulePreviewResponse(BaseModel):
@@ -330,6 +350,7 @@ class RulePreviewResponse(BaseModel):
     matched_blocks: int
     empty_title_count: int
     empty_content_count: int
+    debug: RulePreviewDebug
     items: List[IntelligenceDetail]
 
 

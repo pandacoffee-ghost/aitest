@@ -150,6 +150,39 @@ def test_task_run_summary_endpoint_returns_latest_metrics(client, db_session, mo
     assert body["latest_status"] == "completed"
     assert body["items_fetched"] == 1
     assert body["items_collected"] == 1
+    assert body["success_count"] == 1
+    assert body["failure_count"] == 0
+
+
+def test_task_run_summary_counts_successes_and_failures(client, db_session, monkeypatch):
+    task = create_task(db_session)
+    service = TaskService(db_session)
+    scraper = ScraperService(db_session)
+
+    async def fake_success(task_model):
+        return [
+            IntelligenceDetailModel(
+                title="ok",
+                content="ok",
+                deduplication_key="ok-key",
+                collected_at=datetime.utcnow(),
+            )
+        ]
+
+    async def fake_failure(task_model):
+        raise RuntimeError("fail")
+
+    monkeypatch.setattr(scraper, "execute_task", fake_success)
+    service.execute_task(task.id, scraper)
+    monkeypatch.setattr(scraper, "execute_task", fake_failure)
+    service.execute_task(task.id, scraper)
+
+    response = client.get(f"/api/v1/tasks/{task.id}/run-summary")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success_count"] == 1
+    assert body["failure_count"] == 1
 
 
 def test_run_endpoint_queues_task_and_submits_background_job(client, db_session, monkeypatch):
@@ -277,6 +310,9 @@ def test_rule_preview_endpoint_parses_raw_html(client):
     assert body["matched_blocks"] == 1
     assert body["empty_title_count"] == 0
     assert body["empty_content_count"] == 0
+    assert body["debug"]["title_hits"] == 1
+    assert body["debug"]["content_hits"] == 1
+    assert body["debug"]["link_hits"] == 1
     assert body["items"][0]["title"] == "Preview Title"
     assert body["items"][0]["content"] == "Preview Content"
     assert body["items"][0]["raw_data"]["link"] == "https://example.com/preview"
@@ -312,6 +348,33 @@ def test_rule_preview_endpoint_can_fetch_from_url(client, monkeypatch):
     body = response.json()
     assert body["count"] == 1
     assert body["items"][0]["title"] == "Fetched Title"
+
+
+def test_rule_preview_returns_problem_samples(client):
+    response = client.post(
+        "/api/v1/rules/preview",
+        json={
+            "name": "problem preview",
+            "list_selector": "article",
+            "title_selector": "h2",
+            "content_selector": "p",
+            "raw_html": """
+                <html><body>
+                  <article>
+                    <p>Missing title</p>
+                  </article>
+                  <article>
+                    <h2>Missing content</h2>
+                  </article>
+                </body></html>
+            """,
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body["debug"]["problem_samples"]) == 2
+    assert body["debug"]["problem_samples"][0]["missing_fields"]
 
 
 def test_task_detail_includes_bound_rule(client, db_session):
@@ -398,6 +461,70 @@ def test_task_update_changes_runtime_behavior(client, db_session):
 
     assert len(items) == 1
     assert items[0].title == "Brand Watch"
+
+
+def test_task_update_rejects_non_runnable_configuration(client, db_session):
+    task = CollectionTaskModel(
+        name="invalid edit target",
+        url="https://example.com",
+        status=TaskStatus.PENDING.value,
+    )
+    db_session.add(task)
+    db_session.commit()
+    db_session.refresh(task)
+
+    response = client.put(
+        f"/api/v1/tasks/{task.id}",
+        json={
+            "url": None,
+            "source_ids": [],
+            "rule_id": None,
+            "list_selector": None,
+            "title_selector": None,
+            "content_selector": None,
+        },
+    )
+
+    assert response.status_code == 400
+    assert "not runnable" in response.json()["detail"].lower()
+
+
+def test_task_update_rejects_unknown_rule_id(client, db_session):
+    task = CollectionTaskModel(
+        name="unknown rule target",
+        url="https://example.com",
+        status=TaskStatus.PENDING.value,
+    )
+    db_session.add(task)
+    db_session.commit()
+    db_session.refresh(task)
+
+    response = client.put(
+        f"/api/v1/tasks/{task.id}",
+        json={"rule_id": "missing-rule-id"},
+    )
+
+    assert response.status_code == 400
+    assert "rule" in response.json()["detail"].lower()
+
+
+def test_task_update_rejects_unknown_source_ids(client, db_session):
+    task = CollectionTaskModel(
+        name="unknown source target",
+        url="https://example.com",
+        status=TaskStatus.PENDING.value,
+    )
+    db_session.add(task)
+    db_session.commit()
+    db_session.refresh(task)
+
+    response = client.put(
+        f"/api/v1/tasks/{task.id}",
+        json={"source_ids": ["missing-source-id"]},
+    )
+
+    assert response.status_code == 400
+    assert "source" in response.json()["detail"].lower()
 
 
 def test_batch_pause_updates_multiple_running_tasks(client, db_session):
@@ -540,8 +667,9 @@ def test_task_list_supports_status_and_rule_filters(client, db_session):
 
     assert response.status_code == 200
     body = response.json()
-    assert len(body) == 1
-    assert body[0]["name"] == "matching"
+    assert body["total"] == 1
+    assert len(body["items"]) == 1
+    assert body["items"][0]["name"] == "matching"
 
 
 def test_task_list_supports_name_search(client, db_session):
@@ -557,8 +685,28 @@ def test_task_list_supports_name_search(client, db_session):
 
     assert response.status_code == 200
     body = response.json()
-    assert len(body) == 1
-    assert body[0]["name"] == "Competitor Monitor"
+    assert body["total"] == 1
+    assert len(body["items"]) == 1
+    assert body["items"][0]["name"] == "Competitor Monitor"
+
+
+def test_task_list_returns_pagination_metadata(client, db_session):
+    db_session.add_all(
+        [
+            CollectionTaskModel(name="Task 1", status=TaskStatus.PENDING.value),
+            CollectionTaskModel(name="Task 2", status=TaskStatus.PENDING.value),
+            CollectionTaskModel(name="Task 3", status=TaskStatus.PENDING.value),
+        ]
+    )
+    db_session.commit()
+
+    response = client.get("/api/v1/tasks?skip=0&limit=2")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total"] == 3
+    assert body["items"][0]["name"] == "Task 1"
+    assert len(body["items"]) == 2
 
 
 def test_rule_list_supports_name_search(client, db_session):
@@ -574,8 +722,28 @@ def test_rule_list_supports_name_search(client, db_session):
 
     assert response.status_code == 200
     body = response.json()
-    assert len(body) == 1
-    assert body[0]["name"] == "Homepage Rule"
+    assert body["total"] == 1
+    assert len(body["items"]) == 1
+    assert body["items"][0]["name"] == "Homepage Rule"
+
+
+def test_rule_list_returns_pagination_metadata(client, db_session):
+    db_session.add_all(
+        [
+            CollectionRuleModel(name="Rule 1"),
+            CollectionRuleModel(name="Rule 2"),
+            CollectionRuleModel(name="Rule 3"),
+        ]
+    )
+    db_session.commit()
+
+    response = client.get("/api/v1/rules?skip=0&limit=2")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total"] == 3
+    assert len(body["items"]) == 2
+    assert body["items"][0]["name"] == "Rule 1"
 
 
 def test_rule_can_be_disabled_and_enabled(client, db_session):

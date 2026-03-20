@@ -8,6 +8,7 @@ from bis.models.schemas import (
     CollectionTaskCreate,
     CollectionTaskUpdate,
     CollectionTask,
+    TaskListResponse,
     CollectionTaskRun,
     TaskRunSummary,
     TaskBatchActionRequest,
@@ -21,10 +22,13 @@ router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
 @router.post("", response_model=CollectionTask, status_code=status.HTTP_201_CREATED)
 def create_task(data: CollectionTaskCreate, db: Session = Depends(get_db)):
     service = TaskService(db)
-    return service.create(data)
+    try:
+        return service.create(data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("", response_model=List[CollectionTask])
+@router.get("", response_model=TaskListResponse)
 def list_tasks(
     skip: int = 0,
     limit: int = 100,
@@ -94,10 +98,13 @@ def batch_cancel(data: TaskBatchActionRequest, db: Session = Depends(get_db)):
 @router.put("/{task_id}", response_model=CollectionTask)
 def update_task(task_id: str, data: CollectionTaskUpdate, db: Session = Depends(get_db)):
     service = TaskService(db)
-    task = service.update(task_id, data)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return task
+    try:
+        task = service.update(task_id, data)
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+        return task
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)

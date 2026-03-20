@@ -2,7 +2,7 @@ import asyncio
 from typing import List, Optional
 
 from bis.models.models import CollectionRuleModel, CollectionTaskModel
-from bis.models.schemas import CollectionRuleCreate, CollectionRuleUpdate, RulePreviewRequest
+from bis.models.schemas import CollectionRuleCreate, CollectionRuleUpdate, RuleListResponse, RulePreviewRequest
 from bis.repositories.repositories import RuleRepository
 from bis.services.scraper_service import ScraperService
 
@@ -44,8 +44,10 @@ class RuleService:
         limit: int = 100,
         source_id: Optional[str] = None,
         q: Optional[str] = None,
-    ) -> List[CollectionRuleModel]:
-        return self.repo.get_filtered(skip=skip, limit=limit, source_id=source_id, q=q)
+    ) -> RuleListResponse:
+        items = self.repo.get_filtered(skip=skip, limit=limit, source_id=source_id, q=q)
+        total = self.repo.count_filtered(source_id=source_id, q=q)
+        return RuleListResponse(total=total, items=items)
 
     def get_by_id(self, rule_id: str) -> Optional[CollectionRuleModel]:
         return self.repo.get_by_id(rule_id)

@@ -150,6 +150,11 @@ class ScraperService:
             "matched_blocks": len(elements),
             "empty_title_count": 0,
             "empty_content_count": 0,
+            "title_hits": 0,
+            "content_hits": 0,
+            "link_hits": 0,
+            "date_hits": 0,
+            "problem_samples": [],
         }
         
         keywords = [k.lower() for k in (task.keywords or [])]
@@ -177,8 +182,30 @@ class ScraperService:
             )
             if not title:
                 stats["empty_title_count"] += 1
+            else:
+                stats["title_hits"] += 1
             if not content:
                 stats["empty_content_count"] += 1
+            else:
+                stats["content_hits"] += 1
+            if link:
+                stats["link_hits"] += 1
+            if date:
+                stats["date_hits"] += 1
+            missing_fields = []
+            if not title:
+                missing_fields.append("title")
+            if not content:
+                missing_fields.append("content")
+            if not link:
+                missing_fields.append("link")
+            if missing_fields and len(stats["problem_samples"]) < 5:
+                stats["problem_samples"].append(
+                    {
+                        "missing_fields": missing_fields,
+                        "text_preview": element.get_text(" ", strip=True)[:120],
+                    }
+                )
             
             if not title and not content:
                 continue
