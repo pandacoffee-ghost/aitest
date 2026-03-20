@@ -2,7 +2,15 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from bis.models.models import IntelligenceSourceModel, ProxyModel, UserAgentModel, CollectionTaskModel, IntelligenceDetailModel
+from bis.models.models import (
+    IntelligenceSourceModel,
+    ProxyModel,
+    UserAgentModel,
+    CollectionTaskModel,
+    CollectionTaskRunModel,
+    CollectionRuleModel,
+    IntelligenceDetailModel,
+)
 from bis.repositories.base import BaseRepository
 
 
@@ -55,6 +63,23 @@ class TaskRepository(BaseRepository[CollectionTaskModel]):
     def get_running(self) -> List[CollectionTaskModel]:
         return self.get_by_status("running")
 
+    def get_filtered(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        status: Optional[str] = None,
+        rule_id: Optional[str] = None,
+        q: Optional[str] = None,
+    ) -> List[CollectionTaskModel]:
+        query = self.db.query(self.model)
+        if status:
+            query = query.filter(self.model.status == status)
+        if rule_id:
+            query = query.filter(self.model.rule_id == rule_id)
+        if q:
+            query = query.filter(self.model.name.ilike(f"%{q}%"))
+        return query.offset(skip).limit(limit).all()
+
 
 class IntelligenceRepository(BaseRepository[IntelligenceDetailModel]):
     def __init__(self, db: Session):
@@ -89,3 +114,38 @@ class IntelligenceRepository(BaseRepository[IntelligenceDetailModel]):
 
     def exists_by_dedup_key(self, dedup_key: str) -> bool:
         return self.db.query(self.model).filter(self.model.deduplication_key == dedup_key).first() is not None
+
+
+class TaskRunRepository(BaseRepository[CollectionTaskRunModel]):
+    def __init__(self, db: Session):
+        super().__init__(CollectionTaskRunModel, db)
+
+    def get_by_task_id(self, task_id: str) -> List[CollectionTaskRunModel]:
+        return (
+            self.db.query(self.model)
+            .filter(self.model.task_id == task_id)
+            .order_by(self.model.started_at.desc())
+            .all()
+        )
+
+
+class RuleRepository(BaseRepository[CollectionRuleModel]):
+    def __init__(self, db: Session):
+        super().__init__(CollectionRuleModel, db)
+
+    def get_by_source_id(self, source_id: str) -> List[CollectionRuleModel]:
+        return self.db.query(self.model).filter(self.model.source_id == source_id).all()
+
+    def get_filtered(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        source_id: Optional[str] = None,
+        q: Optional[str] = None,
+    ) -> List[CollectionRuleModel]:
+        query = self.db.query(self.model)
+        if source_id:
+            query = query.filter(self.model.source_id == source_id)
+        if q:
+            query = query.filter(self.model.name.ilike(f"%{q}%"))
+        return query.offset(skip).limit(limit).all()

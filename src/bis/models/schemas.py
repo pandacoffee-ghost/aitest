@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
@@ -17,11 +17,19 @@ class Protocol(str, Enum):
 
 
 class TaskStatus(str, Enum):
+    QUEUED = "queued"
     PENDING = "pending"
     RUNNING = "running"
     PAUSED = "paused"
     CANCELLED = "cancelled"
     COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class TaskRunStatus(str, Enum):
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class IntelligenceSourceBase(BaseModel):
@@ -52,8 +60,7 @@ class IntelligenceSource(IntelligenceSourceBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProxyBase(BaseModel):
@@ -76,8 +83,7 @@ class Proxy(ProxyBase):
     last_tested_at: Optional[datetime]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserAgentBase(BaseModel):
@@ -95,8 +101,7 @@ class UserAgent(UserAgentBase):
     enabled: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SelectorType(str, Enum):
@@ -108,6 +113,7 @@ class SelectorType(str, Enum):
 class CollectionTaskBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
     source_ids: List[str] = Field(default_factory=list)
+    rule_id: Optional[str] = None
     
     url: Optional[str] = Field(None, max_length=2000)
     charset: str = Field(default="utf-8")
@@ -145,6 +151,7 @@ class CollectionTaskCreate(CollectionTaskBase):
 class CollectionTaskUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=200)
     source_ids: Optional[List[str]] = None
+    rule_id: Optional[str] = None
     url: Optional[str] = None
     charset: Optional[str] = None
     list_selector: Optional[str] = None
@@ -171,9 +178,43 @@ class CollectionTask(CollectionTaskBase):
     status: TaskStatus
     created_at: datetime
     updated_at: datetime
+    rule: Optional["CollectionRule"] = None
+    latest_run: Optional["CollectionTaskRun"] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CollectionTaskRun(BaseModel):
+    id: str
+    task_id: str
+    status: TaskRunStatus
+    started_at: datetime
+    finished_at: Optional[datetime]
+    items_fetched: int
+    items_collected: int
+    error_message: Optional[str]
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TaskRuleBindingRequest(BaseModel):
+    task_ids: List[str] = Field(min_length=1)
+    rule_id: str
+
+
+class TaskBatchActionRequest(BaseModel):
+    task_ids: List[str] = Field(min_length=1)
+
+
+class TaskRunSummary(BaseModel):
+    task_id: str
+    latest_status: Optional[TaskRunStatus] = None
+    started_at: Optional[datetime] = None
+    finished_at: Optional[datetime] = None
+    items_fetched: int = 0
+    items_collected: int = 0
+    error_message: Optional[str] = None
 
 
 class IntelligenceDetailBase(BaseModel):
@@ -191,8 +232,7 @@ class IntelligenceDetail(IntelligenceDetailBase):
     collected_at: Optional[datetime]
     processed_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class IntelligenceSearchQuery(BaseModel):
@@ -277,5 +317,20 @@ class CollectionRule(CollectionRuleBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RulePreviewRequest(CollectionRuleBase):
+    url: Optional[str] = Field(None, max_length=2000)
+    raw_html: Optional[str] = None
+
+
+class RulePreviewResponse(BaseModel):
+    count: int
+    matched_blocks: int
+    empty_title_count: int
+    empty_content_count: int
+    items: List[IntelligenceDetail]
+
+
+CollectionTask.model_rebuild()

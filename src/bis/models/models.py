@@ -23,11 +23,19 @@ class Protocol(str, Enum):
 
 
 class TaskStatus(str, Enum):
+    QUEUED = "queued"
     PENDING = "pending"
     RUNNING = "running"
     PAUSED = "paused"
     CANCELLED = "cancelled"
     COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class TaskRunStatus(str, Enum):
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class IntelligenceSourceModel(Base):
@@ -81,6 +89,7 @@ class CollectionTaskModel(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(200), nullable=False)
     source_ids = Column(JSON, default=list)
+    rule_id = Column(String(36), ForeignKey("collection_rules.id"), nullable=True)
     
     url = Column(String(2000), nullable=True)
     charset = Column(String(20), default="utf-8")
@@ -113,6 +122,34 @@ class CollectionTaskModel(Base):
     last_run_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    runs = relationship(
+        "CollectionTaskRunModel",
+        back_populates="task",
+        cascade="all, delete-orphan",
+        order_by="desc(CollectionTaskRunModel.started_at)",
+    )
+    rule = relationship("CollectionRuleModel")
+
+    @property
+    def latest_run(self):
+        return self.runs[0] if self.runs else None
+
+
+class CollectionTaskRunModel(Base):
+    __tablename__ = "collection_task_runs"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    task_id = Column(String(36), ForeignKey("collection_tasks.id"), nullable=False, index=True)
+    status = Column(String(50), nullable=False, default=TaskRunStatus.RUNNING.value)
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    finished_at = Column(DateTime, nullable=True)
+    items_fetched = Column(Integer, default=0)
+    items_collected = Column(Integer, default=0)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    task = relationship("CollectionTaskModel", back_populates="runs")
 
 
 class IntelligenceDetailModel(Base):

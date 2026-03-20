@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse
 from bis.core.config import get_settings
 from bis.core.logging import setup_logging
 from bis.core.database import init_db
+from bis.core.task_runner import shutdown_task_runner
 from bis.api import sources, proxies, user_agents, tasks, intelligence, rules
 
 settings = get_settings()
@@ -16,6 +17,7 @@ async def lifespan(app: FastAPI):
     setup_logging(settings.app.debug)
     init_db()
     yield
+    shutdown_task_runner()
 
 
 app = FastAPI(

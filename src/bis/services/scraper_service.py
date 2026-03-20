@@ -45,7 +45,10 @@ class ScraperService:
         return items
     
     async def fetch_page(self, task: CollectionTaskModel) -> Optional[tuple]:
-        headers = {}
+        url, headers, cookies = self.build_request_options(task)
+        if not url:
+            return None
+
         if task.ua_enabled:
             ua = self.get_random_ua()
             if ua:
@@ -62,20 +65,51 @@ class ScraperService:
         
         timeout = task.timeout or 30
         screenshot = None
+        html = await self.fetch_html(
+            url,
+            headers=headers,
+            cookies=cookies,
+            timeout=timeout,
+            proxy_url=proxy_url,
+        )
+            
+        if task.do_screenshot:
+            try:
+                screenshot = await self.take_screenshot(url, proxy_url, headers)
+            except Exception as e:
+                print(f"Screenshot failed: {e}")
         
+        return html, screenshot
+
+    async def fetch_html(
+        self,
+        url: str,
+        headers: Optional[Dict[str, str]] = None,
+        cookies: Optional[Dict[str, str]] = None,
+        timeout: int = 30,
+        proxy_url: Optional[str] = None,
+    ) -> str:
         async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
             proxies = {"http://": proxy_url, "https://": proxy_url} if proxy_url else None
-            response = await client.get(task.url, headers=headers, proxies=proxies)
+            response = await client.get(url, headers=headers or {}, cookies=cookies or {}, proxies=proxies)
             response.raise_for_status()
-            html = response.text
-            
-            if task.do_screenshot:
-                try:
-                    screenshot = await self.take_screenshot(task.url, proxy_url, headers)
-                except Exception as e:
-                    print(f"Screenshot failed: {e}")
-            
-            return html, screenshot
+            return response.text
+
+    def build_request_options(self, task: CollectionTaskModel) -> tuple[Optional[str], Dict[str, str], Dict[str, str]]:
+        headers: Dict[str, str] = {}
+        cookies: Dict[str, str] = {}
+        url = task.url
+
+        source = None
+        if task.source_ids:
+            source = self.source_repo.get_by_id(task.source_ids[0])
+
+        if source:
+            headers.update(source.headers or {})
+            cookies.update(source.cookies or {})
+            url = url or source.url
+
+        return url, headers, cookies
     
     async def take_screenshot(self, url: str, proxy_url: str, headers: dict) -> Optional[str]:
         return None
@@ -91,25 +125,60 @@ class ScraperService:
         return random.choice(proxies) if proxies else None
     
     def parse_content(self, task: CollectionTaskModel, html: str, screenshot: Optional[str] = None) -> List[IntelligenceDetailModel]:
+        items, _ = self.parse_content_with_stats(task, html, screenshot)
+        return items
+
+    def parse_content_with_stats(
+        self,
+        task: CollectionTaskModel,
+        html: str,
+        screenshot: Optional[str] = None,
+    ) -> tuple[List[IntelligenceDetailModel], Dict[str, int]]:
         items = []
-        
+
         try:
             soup = BeautifulSoup(html, 'lxml')
         except Exception:
             soup = BeautifulSoup(html, 'html.parser')
         
-        selector = task.list_selector or 'article'
-        selector_type = task.list_selector_type or 'css'
+        rule = task.rule
+        selector = task.list_selector or (rule.list_selector if rule else None) or 'article'
+        selector_type = task.list_selector_type or (rule.list_selector_type if rule else None) or 'css'
         
         elements = self.select_elements(soup, selector, selector_type)
+        stats = {
+            "matched_blocks": len(elements),
+            "empty_title_count": 0,
+            "empty_content_count": 0,
+        }
         
         keywords = [k.lower() for k in (task.keywords or [])]
         
         for element in elements:
-            title = self.extract_text(element, task.title_selector, task.title_selector_type)
-            content = self.extract_text(element, task.content_selector, task.content_selector_type)
-            link = self.extract_link(element, task.link_selector, task.link_selector_type)
-            date = self.extract_text(element, task.date_selector, task.date_selector_type)
+            title = self.extract_text(
+                element,
+                task.title_selector or (rule.title_selector if rule else None),
+                task.title_selector_type or (rule.title_selector_type if rule else 'css'),
+            )
+            content = self.extract_text(
+                element,
+                task.content_selector or (rule.content_selector if rule else None),
+                task.content_selector_type or (rule.content_selector_type if rule else 'css'),
+            )
+            link = self.extract_link(
+                element,
+                task.link_selector or (rule.link_selector if rule else None),
+                task.link_selector_type or (rule.link_selector_type if rule else 'css'),
+            )
+            date = self.extract_text(
+                element,
+                task.date_selector or (rule.date_selector if rule else None),
+                task.date_selector_type or (rule.date_selector_type if rule else 'css'),
+            )
+            if not title:
+                stats["empty_title_count"] += 1
+            if not content:
+                stats["empty_content_count"] += 1
             
             if not title and not content:
                 continue
@@ -135,11 +204,12 @@ class ScraperService:
                 raw_data=raw_data,
                 collected_at=datetime.utcnow(),
             )
+            item.deduplication_key = self._generate_key(task, title, link)
             
             if task.keywords:
                 item.keywords = task.keywords
             
-            existing = self.intel_repo.exists_by_dedup_key(self._generate_key(task, title, link))
+            existing = self.intel_repo.exists_by_dedup_key(item.deduplication_key)
             if not existing:
                 items.append(item)
         
@@ -148,8 +218,8 @@ class ScraperService:
             self.db.commit()
             for item in items:
                 self.db.refresh(item)
-        
-        return items
+
+        return items, stats
     
     def select_elements(self, soup, selector: str, selector_type: str) -> List:
         if not selector:

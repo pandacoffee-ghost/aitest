@@ -9,6 +9,21 @@ from bis.services.intelligence_service import IntelligenceService
 router = APIRouter(prefix="/api/v1/intelligence", tags=["intelligence"])
 
 
+def parse_optional_datetime(value: str | None, field_name: str):
+    from datetime import datetime
+
+    if value is None:
+        return None
+
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid {field_name} format. Use ISO 8601.",
+        ) from exc
+
+
 @router.get("", response_model=List[IntelligenceDetail])
 def search_intelligence(
     source_id: str = None,
@@ -19,13 +34,11 @@ def search_intelligence(
     page_size: int = 20,
     db: Session = Depends(get_db),
 ):
-    from datetime import datetime
-
     query = IntelligenceSearchQuery(
         source_id=source_id,
         keyword=keyword,
-        start_date=datetime.fromisoformat(start_date) if start_date else None,
-        end_date=datetime.fromisoformat(end_date) if end_date else None,
+        start_date=parse_optional_datetime(start_date, "start_date"),
+        end_date=parse_optional_datetime(end_date, "end_date"),
         page=page,
         page_size=page_size,
     )
